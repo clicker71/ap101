@@ -1,0 +1,45 @@
+# CI/CD — AP-101B FERRITE DISCIPLINE
+#
+# TRIGGER: PUSH TO MASTER, PULL REQUESTS.
+# JOBS: CARGO TEST, CLIPPY (DENY WARNINGS), MIRI (FERRITE-CORE ONLY).
+# MACHINE: UBUNTU-LATEST. RUST: STABLE.
+
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: cargo test (workspace)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test --workspace
+
+  clippy:
+    name: cargo clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - run: cargo clippy --workspace -- -D warnings
+
+  miri:
+    name: cargo miri (ferrite-core)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: miri
+      - run: cargo miri test -p ferrite-core

@@ -1,0 +1,23 @@
+#--------------------------------------------------------------------
+# PACKAGE:       ferrite-core
+# PURPOSE:       NO_STD PRIMITIVES FOR FERRITE-CORE DISCIPLINE:
+#                SEU-RESISTANT CELLS, STRUCTURAL AUDIT, CHECKSUMS.
+# AUTHOR:        Daniil Solgalov <clicker71@github>
+# DATE:          2026-06-22
+# MACHINE:       IBM AP-101B (HONORARY)
+# CONSTRAINTS:   ZERO DEPENDENCIES IN NO_STD MODE.
+#--------------------------------------------------------------------
+
+[package]
+name = "ferrite-core"
+version = "0.1.0"
+edition = "2021"
+authors = ["Daniil Solgalov <clicker71@github.com>"]
+description = "no_std primitives for ferrite-core discipline: SEU-resistant cells, structural audit, checksums"
+
+[features]
+default = []
+std = []
+
+[dependencies]
+# ZERO DEPENDENCIES IN NO_STD MODE

@@ -1,0 +1,22 @@
+#--------------------------------------------------------------------
+# WORKSPACE:     AP-101B FERRITE DISCIPLINE — CARGO WORKSPACE ROOT
+# PURPOSE:       WORKSPACE MANIFEST. MEMBERS: ferrite-core, ferrite-testkit.
+# AUTHOR:        Daniil Solgalov <clicker71@github>
+# DATE:          2026-06-22
+# MACHINE:       IBM AP-101B (HONORARY)
+# CONSTRAINTS:   256 KB USABLE CORE. NO HEAP WITHOUT CAUSE.
+#--------------------------------------------------------------------
+
+[workspace]
+members = [
+    "ferrite-core",
+    "ferrite-testkit",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["Daniil Solgalov <clicker71@github.com>"]
+repository = "https://github.com/clicker71/ap101"

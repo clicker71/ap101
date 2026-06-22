@@ -1,0 +1,21 @@
+#--------------------------------------------------------------------
+# PACKAGE:       ferrite-testkit
+# PURPOSE:       STD TESTING LIBRARY FOR FERRITE-CORE DISCIPLINE:
+#                HEAP ISOLATION DETECTOR, PROPTEST SEU STRATEGIES.
+# AUTHOR:        Daniil Solgalov <clicker71@github>
+# DATE:          2026-06-22
+# MACHINE:       IBM AP-101B (HONORARY)
+# CONSTRAINTS:   STD ALLOWED (TEST-ONLY). MUST NOT LEAK INTO NO_STD.
+#--------------------------------------------------------------------
+
+[package]
+name = "ferrite-testkit"
+version = "0.1.0"
+edition = "2021"
+authors = ["Daniil Solgalov <clicker71@github.com>"]
+description = "Test utilities for ferrite-core discipline: heap isolation, PBT strategies"
+
+[dependencies]
+ferrite-core = { path = "../ferrite-core", features = ["std"] }
+proptest = "1.4"
+rand = "0.8"
