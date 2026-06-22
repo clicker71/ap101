@@ -12,3 +12,10 @@ pub mod heap;
 
 // STRATEGY — PROPTEST SEU STRATEGIES.
 pub mod strategy;
+
+// RE-EXPORT KEY SYMBOLS.
+pub use heap::{
+    execute_on_ferrite_core, execute_on_ferrite_core_with, set_global_allocator_ref,
+    TestAllocator,
+};
+pub use strategy::{assert_seu_detected, bit_index, byte_offset, finite_f32, finite_f64};

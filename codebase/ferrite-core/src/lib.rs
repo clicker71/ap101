@@ -21,3 +21,8 @@ pub mod checksum;
 
 // IBM PASS CRT TELEMETRY — DECORATIVE OUTPUT (STD FEATURE).
 pub mod telemetry;
+
+// RE-EXPORT KEY SYMBOLS FOR ERGONOMIC USE.
+pub use audit::{audit_exact_size, audit_size_and_align, GeometryReport};
+pub use cell::FerriteCell;
+pub use checksum::{Checksum, Crc16, Crc32, XorFold};
