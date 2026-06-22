@@ -16,10 +16,6 @@ env:
   CARGO_TERM_COLOR: always
   PROPTEST_CASES: 10000
 
-defaults:
-  run:
-    working-directory: codebase
-
 jobs:
   test:
     name: cargo test (workspace)

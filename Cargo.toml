@@ -1,6 +1,7 @@
 #--------------------------------------------------------------------
 # WORKSPACE:     AP-101B FERRITE DISCIPLINE — CARGO WORKSPACE ROOT
-# PURPOSE:       WORKSPACE MANIFEST. MEMBERS: ferrite-core, ferrite-testkit.
+# PURPOSE:       WORKSPACE MANIFEST AT REPO ROOT FOR GIT DEPENDENCY COMPAT.
+#                MEMBERS LIVE UNDER codebase/.
 # AUTHOR:        Daniil Solgalov <clicker71@github>
 # DATE:          2026-06-22
 # MACHINE:       IBM AP-101B (HONORARY)
@@ -9,11 +10,11 @@
 
 [workspace]
 members = [
-    "ferrite-core",
-    "ferrite-testkit",
-    "examples/ap101b-core",
-    "examples/ap101s-cmos",
-    "examples/clarus-audit",
+    "codebase/ferrite-core",
+    "codebase/ferrite-testkit",
+    "codebase/examples/ap101b-core",
+    "codebase/examples/ap101s-cmos",
+    "codebase/examples/clarus-audit",
 ]
 resolver = "2"
 

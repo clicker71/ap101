@@ -3,7 +3,7 @@
 **no_std memory integrity test harness honoring the IBM AP-101B Shuttle computer. CRC-32, SEU simulation, compact struct verification.**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![CI](https://github.com/clicker71/ap101/actions/workflows/ci.yml/badge.svg)](https://github.com/clicker71/ap101/actions/workflows/ci.yml)
+[![Mission Status](https://img.shields.io/badge/AP--101-GO%20FOR%20LAUNCH-brightgreen)](https://github.com/clicker71/ap101)
 
 > **MISSION STATUS:** GO FOR LAUNCH — All discipline checks compliant. v0.1.0-alpha.
 
@@ -260,11 +260,11 @@ Add to `Cargo.toml`:
 
 ```toml
 [dependencies]
-ferrite-core = { git = "https://github.com/clicker71/ap101" }
+ferrite-core = { git = "https://github.com/clicker71/ap101", package = "ferrite-core" }
 
 [dev-dependencies]
 # ferrite-testkit brings in std support for verification
-ferrite-testkit = { git = "https://github.com/clicker71/ap101" }
+ferrite-testkit = { git = "https://github.com/clicker71/ap101", package = "ferrite-testkit" }
 ```
 
 Run the navigation example test suite:
