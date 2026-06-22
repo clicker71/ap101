@@ -122,6 +122,10 @@ in medicine, in any system where failure is not an option. And for everyone
 who simply loves clean, tight, beautiful code. No heap allocation left
 unexamined. No padding byte unaccounted for.
 
+**Full historical context** — the Shuttle's ferrite-to-CMOS transition, STS-37/STS-40,
+and why this discipline matters for modern silicon: **[HISTORY.md](HISTORY.md)**
+(Russian: **[HISTORY.ru.md](HISTORY.ru.md)**). Русская версия README: **[README.ru.md](README.ru.md)**.
+
 ---
 
 ## What It Does
@@ -219,15 +223,15 @@ that `ferrite-core` provides is verified by the same discipline:
 
 ```
 ╔════════════════════════════════════════════════════════════════╗
-║ IBM AP-101B FERRITE CORE                                      ║
-║ TARGET: NAVIGATION SYSTEM v1.0                                ║
+║ IBM AP-101B FERRITE CORE                                       ║
+║ TARGET: NAVIGATION SYSTEM v1.0                                 ║
 ╚════════════════════════════════════════════════════════════════╝
 [ COMPLIANT ] AP101B-CORE-01 | Struct Geometry & Alignment              | Size: 32B (max 32B), Align: 8B (min 4B)
 [ COMPLIANT ] AP101B-CORE-02 | Zero Hidden Padding                      | Expected 32B, got 32B
 [ COMPLIANT ] AP101B-CORE-03 | Deterministic Computation (±4 ULP)       | diff: 0.00e0 ≤ 4.77e-6
 [ COMPLIANT ] AP101B-CORE-04 | Cosmic Ray SEU Resilience                | All bit-flips detected
 ╔════════════════════════════════════════════════════════════════╗
-║ MISSION STATUS: GO FOR LAUNCH.                               ║
+║ MISSION STATUS: GO FOR LAUNCH.                                 ║
 ╚════════════════════════════════════════════════════════════════╝
 ```
 
@@ -235,8 +239,8 @@ that `ferrite-core` provides is verified by the same discipline:
 
 ```
 ╔════════════════════════════════════════════════════════════════╗
-║ IBM AP-101S CMOS                                              ║
-║ TARGET: NAVIGATION SYSTEM v1.0 (CMOS)                         ║
+║ IBM AP-101S CMOS                                               ║
+║ TARGET: NAVIGATION SYSTEM v1.0 (CMOS)                          ║
 ╚════════════════════════════════════════════════════════════════╝
 [ COMPLIANT ] AP101S-CMOS-01 | Struct Geometry & Alignment              | Size: 40B (max 40B), Align: 8B (min 4B)
 [ COMPLIANT ] AP101S-CMOS-02 | Zero Hidden Padding                      | Expected 40B, got 40B
@@ -245,7 +249,7 @@ that `ferrite-core` provides is verified by the same discipline:
 [ COMPLIANT ] AP101S-CMOS-05 | Battery Retention                        | 0x5A=OK, 0x00=LOST
 [ COMPLIANT ] AP101S-CMOS-06 | Deterministic Computation (±4 ULP)       | diff: 0.00e0 ≤ 4.77e-6
 ╔════════════════════════════════════════════════════════════════╗
-║ MISSION STATUS: GO FOR LAUNCH.                               ║
+║ MISSION STATUS: GO FOR LAUNCH.                                 ║
 ╚════════════════════════════════════════════════════════════════╝
 ```
 
