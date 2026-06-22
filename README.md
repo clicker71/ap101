@@ -142,7 +142,7 @@ to guarantee data integrity when the physical silicon fails.
 
 **Full historical context** — the Shuttle's ferrite-to-CMOS transition,
 STS-37/STS-40, and why this matters for modern silicon:
-**[HISTORY.md](HISTORY.md)**.
+**[AP-101 STS Flight History](./HISTORY.md)**.
 
 ---
 

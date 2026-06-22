@@ -124,7 +124,7 @@ AP-101B Space Shuttle использовал магнитную ферритов
 
 **Полный исторический контекст** — переход Shuttle с феррита на КМОП,
 STS-37/STS-40, и почему это важно для современного кремния:
-**[HISTORY.ru.md](HISTORY.ru.md)** (English: **[HISTORY.md](HISTORY.md)**).
+**[История полётов AP-101 STS](./HISTORY.ru.md)** (English: **[AP-101 STS Flight History](./HISTORY.md)**).
 
 ---
 
