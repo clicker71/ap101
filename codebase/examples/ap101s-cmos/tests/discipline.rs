@@ -13,6 +13,7 @@ use ferrite_core::audit::{audit_exact_size, audit_size_and_align};
 use ferrite_core::telemetry::IbmCrt;
 use ferrite_testkit::inject_burst_error;
 use ap101s_cmos::Ap101sNavigationState;
+use proptest::prelude::*;
 use rand::Rng;
 
 // EXPECTED SIZE: u64(8) + f32*3(12) + u32*2(8) + u8(1) + u32(4) = 33
@@ -163,4 +164,37 @@ fn ap101s() {
 
     IbmCrt::print_footer(all_clear);
     assert!(all_clear, "CMOS discipline breached!");
+}
+
+// PROPERTY-BASED TEST FOR CI (RUN SEPARATELY WITH HIGHER ITERATION COUNT)
+proptest! {
+    #[test]
+    fn prop_burst_seu_detection(
+        byte_idx in 0..EXPECTED_SIZE.saturating_sub(2),
+        bit_count in 2u8..=8,
+    ) {
+        let mut state = Ap101sNavigationState::default();
+        state.update_ecc();
+        state.update_checksum();
+        assert!(state.verify_integrity());
+        assert!(state.verify_ecc());
+
+        // INJECT MULTI-BIT BURST
+        let mut raw = unsafe {
+            std::slice::from_raw_parts_mut(
+                &mut state as *mut Ap101sNavigationState as *mut u8,
+                EXPECTED_SIZE,
+            )
+        };
+        inject_burst_error(&mut raw, byte_idx, bit_count);
+
+        // AT LEAST ONE OF CRC OR ECC MUST DETECT
+        let crc_ok = state.verify_integrity();
+        let ecc_ok = state.verify_ecc();
+        prop_assert!(
+            !crc_ok || !ecc_ok,
+            "Multi-bit SEU ({}-bit burst at byte {}) not detected by CRC or ECC",
+            bit_count, byte_idx
+        );
+    }
 }

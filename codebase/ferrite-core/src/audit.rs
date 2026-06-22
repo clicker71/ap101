@@ -106,7 +106,11 @@ macro_rules! assert_no_padding {
             let expected_size: usize = (offset + struct_align - 1) & !(struct_align - 1);
             let actual_size: usize = core::mem::size_of::<$struct>();
             if expected_size != actual_size {
-                panic!("UNEXPECTED PADDING")
+                panic!(concat!(
+                    "UNEXPECTED PADDING in struct ",
+                    stringify!($struct),
+                    ": check field layout — aligned sum ≠ size_of"
+                ))
             }
         };
     };

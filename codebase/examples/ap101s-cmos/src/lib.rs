@@ -27,9 +27,9 @@ use ferrite_core::as_bytes;
 /// status_flags       u32     4       20
 /// ecc_syndrome       u32     4       24
 /// battery_flag       u8      1       28
-/// [padding]          —       3       29  (u32 alignment for checksum)
+/// \[padding\]          —       3       29  (u32 alignment for checksum)
 /// checksum           u32     4       32
-/// [tail padding]     —       4       36  (struct align 8)
+/// \[tail padding\]     —       4       36  (struct align 8)
 ///
 /// TOTAL: 40 bytes (33 data + 3 internal padding + 4 tail padding).
 #[derive(Debug, Clone, Copy)]

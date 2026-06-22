@@ -3,9 +3,9 @@
 **no_std memory integrity test harness honoring the IBM AP-101B Shuttle computer. CRC-32, SEU simulation, compact struct verification.**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Mission Status](https://img.shields.io/badge/AP--101-ABORT-red)](https://github.com/clicker71/ap101/actions)
+[![Mission Status](https://img.shields.io/badge/AP--101-GO%20FOR%20LAUNCH-brightgreen)](https://github.com/clicker71/ap101/actions)
 
-> **MISSION STATUS:** ⛔ ABORT — 4 critical blockers. See plan.
+> **MISSION STATUS:** 🚀 GO FOR LAUNCH — All discipline checks compliant. v0.1.0-alpha.
 
 ---
 
@@ -228,6 +228,10 @@ ap101/
 cargo test -p ap101b-core    # AP-101B ferrite core tests only
 cargo test -p ap101s-cmos    # AP-101S CMOS tests only
 cargo test --workspace       # ALL tests (B + S + core + testkit)
+
+# CI-grade SEU verification (10 000 cases each):
+PROPTEST_CASES=10000 cargo test -p ap101b-core prop_seu_detection
+PROPTEST_CASES=10000 cargo test -p ap101s-cmos prop_burst_seu_detection
 ```
 
 ---
@@ -254,7 +258,7 @@ Adding a new Shuttle computer variant requires only a new example crate:
 | Power loss | Total loss (ferrite is non-volatile but unpowered read = destructive) | SRAM battery retention test |
 | Struct size | 28–40 bytes (compact structs) | Up to 128 bytes (ECC overhead) |
 
-> **Note on the S-model:** The AP-101S used semiconductor memory (CMOS SRAM/DRAM), not ferrite cores. It has its own discipline — `ap101s-cmos` — with checks specific to CMOS: ECC syndrome verification, multi-bit SEU bursts, and SRAM battery retention. The *ferrite*-specific macros (`FerriteCell`, `assert_no_padding!`, destructive-read CRC) are not applied to the S-model because they address failure modes that only exist in core memory. Both models are tested; they simply protect against different physics.
+> **Note on the S-model:** The AP-101S used semiconductor memory (CMOS SRAM/DRAM), not ferrite cores. It has its own discipline — `ap101s-cmos` — with checks specific to CMOS: ECC syndrome verification, multi-bit SEU bursts, and SRAM battery retention. Both models share `ferrite-core` primitives (CRC-32, structural audit, `assert_no_padding!`); the S-model adds ECC on top. Both models are tested; they simply protect against different physics.
 
 ---
 
