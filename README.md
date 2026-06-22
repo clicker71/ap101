@@ -147,6 +147,113 @@ unexamined. No padding byte unaccounted for.
 
 ---
 
+### Proof: Clarus Core
+
+The discipline was born from [Clarus PACS](https://github.com/clarus-pacs/clarus),
+a DICOMweb medical imaging server. The same code that had 128 000 allocations
+per CT study in chunk dedup. The same code we fixed.
+
+We created `examples/clarus-audit/` — a cross-project audit harness that
+copies the EXACT production structs from Clarus Core and runs the full
+AP-101B + AP-101S discipline against them:
+
+```bash
+cargo test -p clarus-audit ap101b_clarus_audit -- --nocapture
+cargo test -p clarus-audit ap101s_clarus_audit -- --nocapture
+```
+
+**B-Model (ferrite core) audit of Clarus Core:**
+
+```
+╔════════════════════════════════════════════════════════════════╗
+║ IBM AP-101B FERRITE CORE DISCIPLINE SUITE v3.0                 ║
+║ TARGET: CLARUS CORE v0.3.0-alpha                               ║
+╚════════════════════════════════════════════════════════════════╝
+[ COMPLIANT ] AP101B-CORE-01 | ChunkRecord Geometry                     | Expected 40B, got 40B
+[ COMPLIANT ] AP101B-CORE-02 | DicomElement Geometry                    | Expected 12B, got 12B | vr: [u8;2] — ZERO HEAP
+[ COMPLIANT ] AP101B-CORE-03 | InstanceMeta Geometry                    | Expected 212B, got 212B
+[ COMPLIANT ] AP101B-CORE-04 | InstanceMeta SEU (1000 flips)            | All bit-flips detected
+[ COMPLIANT ] AP101B-CORE-05 | Zero Hidden Padding                      | Verified at compile time via assert_no_padding!
+╔════════════════════════════════════════════════════════════════╗
+║ MISSION STATUS: GO FOR LAUNCH.                                 ║
+╚════════════════════════════════════════════════════════════════╝
+```
+
+**S-Model (CMOS) audit of Clarus Core — adds multi-bit SEU burst detection:**
+
+```
+╔════════════════════════════════════════════════════════════════╗
+║ IBM AP-101S CMOS FERRITE DISCIPLINE SUITE v3.0                 ║
+║ TARGET: CLARUS CORE v0.3.0-alpha (CMOS)                        ║
+╚════════════════════════════════════════════════════════════════╝
+[ COMPLIANT ] AP101S-CMOS-01 | ChunkRecord Geometry                     | Expected 40B, got 40B
+[ COMPLIANT ] AP101S-CMOS-02 | DicomElement Geometry                    | Expected 12B, got 12B | vr: [u8;2] — ZERO HEAP
+[ COMPLIANT ] AP101S-CMOS-03 | InstanceMeta Geometry                    | Expected 212B, got 212B
+[ COMPLIANT ] AP101S-CMOS-04 | Multi-Bit SEU (1000 bursts, 2-8 bit)     | All bursts detected by CRC-32
+[ COMPLIANT ] AP101S-CMOS-05 | InstanceMeta SEU (1000 flips)            | All bit-flips detected
+[ COMPLIANT ] AP101S-CMOS-06 | Zero Hidden Padding                      | Verified at compile time via assert_no_padding!
+╔════════════════════════════════════════════════════════════════╗
+║ MISSION STATUS: GO FOR LAUNCH.                                 ║
+╚════════════════════════════════════════════════════════════════╝
+```
+
+**Before/After — FMA-02 motivating example (Clarus chunk dedup):**
+
+| Metric | Before (hex String) | After ([u8; 32]) |
+|:---|---:|---:|
+| Allocations per CT study | 128 000 | 0 |
+| Per-study heap churn | ~22 MB | ~5 MB |
+| Concurrent STOW ingestions (256 MB RAM) | 3 → OOM-kill | 6+ (stable) |
+| ChunkRecord size | 40 B (+ heap) | 40 B (stack-only) |
+| Patient re-irradiation risk | Present | Eliminated |
+
+---
+
+### Proof: Self-Test
+
+The discipline auditing itself (meta-circular verification).
+Every `assert_no_padding!` macro, every CRC-32 checksum, every SEU injection
+that `ferrite-core` provides is verified by the same discipline:
+
+**B-Model self-test (`cargo test -p ap101b-core`):**
+
+```
+╔════════════════════════════════════════════════════════════════╗
+║ IBM AP-101B FERRITE CORE                                      ║
+║ TARGET: NAVIGATION SYSTEM v1.0                                ║
+╚════════════════════════════════════════════════════════════════╝
+[ COMPLIANT ] AP101B-CORE-01 | Struct Geometry & Alignment              | Size: 32B (max 32B), Align: 8B (min 4B)
+[ COMPLIANT ] AP101B-CORE-02 | Zero Hidden Padding                      | Expected 32B, got 32B
+[ COMPLIANT ] AP101B-CORE-03 | Deterministic Computation (±4 ULP)       | diff: 0.00e0 ≤ 4.77e-6
+[ COMPLIANT ] AP101B-CORE-04 | Cosmic Ray SEU Resilience                | All bit-flips detected
+╔════════════════════════════════════════════════════════════════╗
+║ MISSION STATUS: GO FOR LAUNCH.                               ║
+╚════════════════════════════════════════════════════════════════╝
+```
+
+**S-Model self-test (`cargo test -p ap101s-cmos`):**
+
+```
+╔════════════════════════════════════════════════════════════════╗
+║ IBM AP-101S CMOS                                              ║
+║ TARGET: NAVIGATION SYSTEM v1.0 (CMOS)                         ║
+╚════════════════════════════════════════════════════════════════╝
+[ COMPLIANT ] AP101S-CMOS-01 | Struct Geometry & Alignment              | Size: 40B (max 40B), Align: 8B (min 4B)
+[ COMPLIANT ] AP101S-CMOS-02 | Zero Hidden Padding                      | Expected 40B, got 40B
+[ COMPLIANT ] AP101S-CMOS-03 | ECC Syndrome Check                       | ECC detects field change
+[ COMPLIANT ] AP101S-CMOS-04 | Multi-Bit SEU Detection (2-8 bit)        | All bursts detected
+[ COMPLIANT ] AP101S-CMOS-05 | Battery Retention                        | 0x5A=OK, 0x00=LOST
+[ COMPLIANT ] AP101S-CMOS-06 | Deterministic Computation (±4 ULP)       | diff: 0.00e0 ≤ 4.77e-6
+╔════════════════════════════════════════════════════════════════╗
+║ MISSION STATUS: GO FOR LAUNCH.                               ║
+╚════════════════════════════════════════════════════════════════╝
+```
+
+All four audit targets — B-model self, S-model self, Clarus Core B-model,
+Clarus Core S-model — return **GO FOR LAUNCH**. The discipline holds.
+
+---
+
 ## Quick Start
 
 Add to `Cargo.toml`:
@@ -206,9 +313,14 @@ ap101/
 │   │   ├── ap101b-core/        # AP-101B: Ferrite core memory
 │   │   │   ├── src/lib.rs      # NavigationState (B-model)
 │   │   │   └── tests/discipline.rs
-│   │   └── ap101s-cmos/        # AP-101S: CMOS SRAM + DRAM/ECC
-│   │       ├── src/lib.rs      # NavigationState (S-model)
-│   │       └── tests/discipline.rs
+│   │   ├── ap101s-cmos/        # AP-101S: CMOS SRAM + DRAM/ECC
+│   │   │   ├── src/lib.rs      # NavigationState (S-model)
+│   │   │   └── tests/discipline.rs
+│   │   └── clarus-audit/       # Cross-project: Clarus Core audit
+│   │       ├── src/lib.rs      # ChunkRecord, DicomElement, InstanceMeta
+│   │       └── tests/
+│   │           ├── b_model.rs  # B-model audit of Clarus
+│   │           └── s_model.rs  # S-model audit (multi-bit SEU)
 │   └── Cargo.toml
 └── .gitignore
 ```

@@ -1,0 +1,23 @@
+#--------------------------------------------------------------------
+# PACKAGE:      clarus-audit
+# PURPOSE:      AP-101 Ferrite Discipline audit of Clarus Core production structs.
+#               Cross-project verification: ChunkRecord, DicomElement, InstanceMeta.
+# AUTHOR:       Daniil Solgalov <clicker71@github>
+# DATE:         2026-06-22
+# MACHINE:      IBM AP-101B (HONORARY) — AUDITING CLARUS CORE v0.3.0-alpha
+# CONSTRAINTS:  Do NOT modify Clarus source. Audit harness only.
+#--------------------------------------------------------------------
+
+[package]
+name = "clarus-audit"
+version = "0.1.0"
+edition = "2021"
+description = "AP-101 Ferrite Discipline audit of Clarus Core production structs"
+
+[dependencies]
+ferrite-core = { path = "../../ferrite-core", features = ["std"] }
+
+[dev-dependencies]
+ferrite-testkit = { path = "../../ferrite-testkit" }
+proptest = "1.4"
+rand = "0.8"
