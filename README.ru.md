@@ -6,7 +6,6 @@
 [![Mission Status](https://img.shields.io/badge/AP--101-GO%20FOR%20LAUNCH-brightgreen)](https://github.com/clicker71/ap101)
 
 > [English version](./README.md) | [Английская версия](./README.md)
-> [Project History](./HISTORY.md) | [История проекта](./HISTORY.ru.md)
 
 > **СТАТУС МИССИИ:** GO FOR LAUNCH — Все проверки дисциплины пройдены. v0.1.0-alpha.
 
@@ -122,6 +121,10 @@ AP-101B Space Shuttle использовал магнитную ферритов
 **Дисциплина:** SEU-симуляция в этом фреймворке заставляет писать и
 тестировать программные отказоустойчивые алгоритмы (CRC-32, XorFold, ECC)
 для гарантии целостности данных при отказе физического кремния.
+
+**Полный исторический контекст** — переход Shuttle с феррита на КМОП,
+STS-37/STS-40, и почему это важно для современного кремния:
+**[HISTORY.ru.md](HISTORY.ru.md)** (English: **[HISTORY.md](HISTORY.md)**).
 
 ---
 
