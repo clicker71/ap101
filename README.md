@@ -3,7 +3,7 @@
 **no_std memory integrity test harness honoring the IBM AP-101B Shuttle computer. CRC-32, SEU simulation, compact struct verification.**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Mission Status](https://img.shields.io/badge/AP--101-GO%20FOR%20LAUNCH-brightgreen)](https://github.com/clicker71/ap101/actions)
+[![CI](https://github.com/clicker71/ap101/actions/workflows/ci.yml/badge.svg)](https://github.com/clicker71/ap101/actions/workflows/ci.yml)
 
 > **MISSION STATUS:** GO FOR LAUNCH — All discipline checks compliant. v0.1.0-alpha.
 
