@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Mission Status](https://img.shields.io/badge/AP--101-GO%20FOR%20LAUNCH-brightgreen)](https://github.com/clicker71/ap101/actions)
 
-> **MISSION STATUS:** 🚀 GO FOR LAUNCH — All discipline checks compliant. v0.1.0-alpha.
+> **MISSION STATUS:** GO FOR LAUNCH — All discipline checks compliant. v0.1.0-alpha.
 
 ---
 
