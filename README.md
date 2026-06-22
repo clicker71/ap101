@@ -5,6 +5,9 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Mission Status](https://img.shields.io/badge/AP--101-GO%20FOR%20LAUNCH-brightgreen)](https://github.com/clicker71/ap101)
 
+> [Русская версия](./README.ru.md) | [Russian README](./README.ru.md)
+> [История проекта](./HISTORY.ru.md) | [Project History](./HISTORY.md)
+
 > **MISSION STATUS:** GO FOR LAUNCH — All discipline checks compliant. v0.1.0-alpha.
 
 ---
@@ -138,10 +141,6 @@ protect against.
 and test software-level fault-tolerant algorithms (CRC-32, XorFold, ECC)
 to guarantee data integrity when the physical silicon fails.
 
-**Full historical context** — the Shuttle's ferrite-to-CMOS transition,
-STS-37/STS-40, and why this matters for modern silicon:
-**[HISTORY.md](HISTORY.md)** (Russian: **[HISTORY.ru.md](HISTORY.ru.md)**).
-
 ---
 
 ## Real-World Proof: Clarus PACS
@@ -181,8 +180,7 @@ hardware fast.
 > `Definitum semel.`
 
 We share this test harness because every byte counts — in space, in medicine,
-in any system where failure is not an option. Русская версия:
-**[README.ru.md](README.ru.md)**.
+in any system where failure is not an option.
 
 ---
 
