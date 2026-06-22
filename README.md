@@ -140,6 +140,10 @@ protect against.
 and test software-level fault-tolerant algorithms (CRC-32, XorFold, ECC)
 to guarantee data integrity when the physical silicon fails.
 
+**Full historical context** — the Shuttle's ferrite-to-CMOS transition,
+STS-37/STS-40, and why this matters for modern silicon:
+**[HISTORY.md](HISTORY.md)**.
+
 ---
 
 ## Real-World Proof: Clarus PACS
