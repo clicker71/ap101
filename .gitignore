@@ -1,0 +1,12 @@
+# AP-101B Ferrite Discipline
+#
+# Confidential/ — plans, prompts, analysis. NEVER commit.
+Confidential/
+
+target/
+**/*.rs.bk
+*.swp
+*.swo
+__pycache__/
+.vscode/
+Cargo.lock
