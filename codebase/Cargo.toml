@@ -11,6 +11,8 @@
 members = [
     "ferrite-core",
     "ferrite-testkit",
+    "examples/ap101b-core",
+    "examples/ap101s-cmos",
 ]
 resolver = "2"
 

@@ -16,12 +16,13 @@ pub struct IbmCrt;
 
 #[cfg(feature = "std")]
 impl IbmCrt {
-    pub fn print_header(subsystem: &str) {
+    pub fn print_header(system: &str, subsystem: &str) {
         println!(
             "\n╔════════════════════════════════════════════════════════════════╗"
         );
         println!(
-            "║ IBM AP-101B FERRITE CORE DISCIPLINE SUITE v3.0                 ║"
+            "║ IBM {:<58}║",
+            system
         );
         println!(
             "║ TARGET: {:<54}║",
@@ -32,9 +33,9 @@ impl IbmCrt {
         );
     }
 
-    pub fn print_row(id: &str, verification: &str, passed: bool, detail: &str) {
+    pub fn print_row(prefix: &str, id: &str, verification: &str, passed: bool, detail: &str) {
         let status = if passed { " COMPLIANT " } else { "ANOMALY DET" };
-        println!("[{status}] AP101B-CORE-{id} | {verification:<40} | {detail}");
+        println!("[{status}] {prefix}{id} | {verification:<40} | {detail}");
     }
 
     pub fn print_footer(all_clear: bool) {

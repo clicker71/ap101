@@ -67,6 +67,38 @@ where
     Ok(())
 }
 
+/// INJECT MULTI-BIT BURST ERROR (DRAM ROW UPSET SIMULATION).
+///
+/// FLIPS `bit_count` ADJACENT BITS STARTING AT `byte_offset`.
+/// SIMULATES DRAM ROW DISTURBANCE WHERE 2–8 NEIGHBORING
+/// BITS FLIP SIMULTANEOUSLY.
+///
+/// ## PANICS
+///
+/// IF `byte_offset + (bit_count / 8) + 1 >= data.len()`.
+pub fn inject_burst_error(data: &mut [u8], byte_offset: usize, bit_count: u8) {
+    assert!((2..=8).contains(&bit_count),
+        "BURST ERROR: bit_count MUST BE 2..=8");
+    let total_bits = bit_count as usize;
+    let end_byte = byte_offset + (total_bits / 8) + 1;
+    assert!(end_byte <= data.len(),
+        "BURST ERROR: offset {} + bits {} exceeds data length {}",
+        byte_offset, bit_count, data.len());
+
+    let mut remaining = total_bits;
+    let mut byte_idx = byte_offset;
+    let mut bit_offset = 0u8;
+
+    while remaining > 0 {
+        let bits_in_this_byte = (8 - bit_offset).min(remaining as u8);
+        let mask = ((1u16 << bits_in_this_byte) - 1) as u8;
+        data[byte_idx] ^= mask << bit_offset;
+        remaining -= bits_in_this_byte as usize;
+        byte_idx += 1;
+        bit_offset = 0;
+    }
+}
+
 /// RANDOM f32 GENERATOR, EXCLUDING NaN AND INFINITY.
 pub fn finite_f32() -> impl Strategy<Value = f32> {
     any::<f32>().prop_filter("must be finite", |f| f.is_finite())

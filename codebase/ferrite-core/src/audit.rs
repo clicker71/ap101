@@ -94,14 +94,19 @@ pub fn audit_exact_size<T>(expected: usize) -> GeometryReport {
 macro_rules! assert_no_padding {
     ($struct:ty, $($field:ident: $ftype:ty),+ $(,)?) => {
         const _: () = {
-            let sum_of_fields: usize = 0 $(+ core::mem::size_of::<$ftype>())+;
-            let struct_size: usize = core::mem::size_of::<$struct>();
-            if sum_of_fields != struct_size {
-                panic!(
-                    "HIDDEN PADDING: struct size ({}B) != sum of field sizes ({}B)",
-                    struct_size,
-                    sum_of_fields,
-                );
+            let struct_align: usize = core::mem::align_of::<$struct>();
+            let mut offset: usize = 0;
+            $(
+                let field_align: usize = core::mem::align_of::<$ftype>();
+                // ALIGN OFFSET TO FIELD ALIGNMENT
+                offset = (offset + field_align - 1) & !(field_align - 1);
+                offset += core::mem::size_of::<$ftype>();
+            )+
+            // ALIGN TO STRUCT ALIGNMENT (TAIL PADDING)
+            let expected_size: usize = (offset + struct_align - 1) & !(struct_align - 1);
+            let actual_size: usize = core::mem::size_of::<$struct>();
+            if expected_size != actual_size {
+                panic!("UNEXPECTED PADDING")
             }
         };
     };

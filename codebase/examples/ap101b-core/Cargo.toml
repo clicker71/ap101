@@ -1,0 +1,14 @@
+[package]
+name = "ap101b-core"
+version = "0.1.0"
+edition = "2021"
+description = "AP-101B ferrite core discipline example: NavigationState + SEU test"
+
+[dependencies]
+ferrite-core = { path = "../../ferrite-core", features = ["std"] }
+serde = { version = "1", features = ["derive"], optional = true }
+
+[dev-dependencies]
+ferrite-testkit = { path = "../../ferrite-testkit" }
+proptest = "1.4"
+rand = "0.8"

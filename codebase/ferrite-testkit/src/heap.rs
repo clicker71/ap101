@@ -14,6 +14,14 @@ use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 
 /// GLOBAL ALLOCATOR FOR TEST ISOLATION.
 ///
+/// ## KNOWN LIMITATION: BYTE COUNTER DRIFT
+///
+/// IF `set_enabled(false)` IS CALLED BETWEEN `alloc` AND `dealloc`,
+/// THE `bytes` COUNTER IS NOT DECREMENTED, CAUSING PERMANENT DRIFT.
+/// USE `reset()` TO ZERO COUNTERS BEFORE EACH TEST.
+/// FOR MULTITHREADED TESTS, USE `execute_on_ferrite_core_with`
+/// WITH A FRESH `TestAllocator` INSTANCE PER THREAD.
+///
 /// ## USAGE
 ///
 /// ```ignore
