@@ -46,10 +46,11 @@
 ║ DEED:       Every contribution helps keep our compilation      ║
 ║             servers alive and running.                         ║
 ║                                                                ║
-║ LINK:       [Boosty](https://boosty.to/clicker71)              ║
-║             Definitum semel.                                   ║
+║              Definitum semel.                                  ║
 ╚════════════════════════════════════════════════════════════════╝
 ```
+
+[SUPPORT MISSION →](https://boosty.to/clicker71/donate)
 
 ---
 
