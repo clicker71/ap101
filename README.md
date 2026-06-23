@@ -1,36 +1,72 @@
 # AP-101B Ferrite Discipline
 
-**no_std memory integrity test harness honoring the IBM AP-101B Shuttle computer. CRC-32, SEU simulation, compact struct verification.**
+> **A compile-time and test-time SIHFT (Software-Implemented Hardware Fault Tolerance) framework for high-performance Rust.**
+> **An automated CI gate ensuring zero-heap allocation compliance, strict struct geometry, and software-level resilience against memory corruption.**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE) [![CI](https://github.com/clicker71/ap101/actions/workflows/ci.yml/badge.svg)](https://github.com/clicker71/ap101/actions/workflows/ci.yml) [![Mission Status](https://img.shields.io/badge/AP--101-GO%20FOR%20LAUNCH-brightgreen)](https://github.com/clicker71/ap101) [![Boosty](https://img.shields.io/badge/Boosty-Support_Mission-orange)](https://boosty.to/clicker71/donate)
 
-> [Русская версия](./README.ru.md) | [Russian README](./README.ru.md)
+---
 
-> **MISSION STATUS:** GO FOR LAUNCH — All discipline checks compliant. v0.1.0-alpha.
+## Real-World Mission: This is a SIHFT Toolkit, Not a Simulator
+
+A common misconception when skimming this repository is that it is an academic
+space shuttle simulator, a retro-computing exercise, or an enthusiast project
+focused on arbitrary 256 KB memory limitations.
+
+**It is none of those.**
+
+`ap101` implements pragmatic **Software-Implemented Hardware Fault Tolerance
+(SIHFT)** concepts for production applications. It was forged as the core
+internal testing discipline for the **[Clarus PACS](https://github.com/clarus-pacs/clarus)**
+medical imaging server. DICOM ingestion dealing with gigabytes of multi-frame
+CT/MRI data cannot tolerate heap churn, fragmentation, or silent data
+corruption caused by unstable hardware.
+
+### Proven Production Impact in Clarus
+
+- **Zero-Heap Reinforcement:** Slashed run-time allocations from **128 000 to
+  exactly 0** per computed tomography (CT) study ingestion.
+- **COTS Hardware Resilience:** Prevents `OOM-KILL` failures and memory
+  corruption crashes on cheap ARM single-board computers and old, repurposed
+  x86 workstations deployed in local regional hospitals. The discipline scales
+  in both directions: keeps budget hardware alive, keeps big hardware fast.
 
 ---
 
-```
-╔════════════════════════════════════════════════════════════════╗
-║ AP-101B FERRITE DISCIPLINE TEST HARNESS — WHAT IT IS           ║
-║                                                                ║
-║ PURPOSE:    Compile-time + runtime audit for embedded/SEU-     ║
-║             critical data structures.                          ║
-║                                                                ║
-║ DOES NOT:   Check that your code runs on 256 KB of RAM.        ║
-║             That was never the goal.                           ║
-║                                                                ║
-║ BORN FROM:  Clarus PACS — DICOMweb server for medical          ║
-║             imaging (github.com/clarus-pacs/clarus).           ║
-║             We built this harness to audit our own code.       ║
-║             We share it because the discipline transcends      ║
-║             any single project.                                ║
-║                                                                ║
-║ TEST:       cargo test -p ap101b-core                          ║
-║             cargo test -p ap101s-cmos                          ║
-║             cargo test --workspace                             ║
-╚════════════════════════════════════════════════════════════════╝
-```
+## Why "AP-101B"?
+
+The **IBM AP-101B** was the core avionics computer of the Space Shuttle.
+The aerospace industry proved that when building on imperfect hardware,
+the software must maintain total architectural discipline down to the
+assembly level.
+
+We brought this philosophy to modern Rust. `ap101` does not run code in
+space; it introduces automated guardrails into your CI suite to ensure
+that your data structures, memory access boundaries, and low-level code
+invariants do not degrade during rapid production refactoring.
+
+**[Full Shuttle history: ferrite-to-CMOS transition, STS-37/STS-40 →](./HISTORY.md)**
+
+---
+
+## The Three Pillars of SIHFT Enforcement
+
+The framework provides three distinct, high-utility tools for your test suite:
+
+1. **Zero-Heap Enforcer (`TestAllocator`):** A global allocator interceptor.
+   If a hot-path parsing function leaks a hidden allocation (`String`, `Vec`,
+   `Box`), the CI pipeline fails immediately.
+
+2. **Structural Integrity (`assert_no_padding!`):** A compile-time layout
+   assertion checking for hidden alignment gaps (padding bytes) in your data
+   structures. Prevents hidden data serialization leaks and stack bloating.
+
+3. **Fault Injection Engine (`FerriteCell<T>`):** A test-runner mechanism
+   designed to simulate physical single-event upsets (SEUs) and transient
+   bit-flips. Validates how your software detects, flags, and gracefully
+   handles physical memory corruption.
+
+---
 
 ## Quick Start
 
@@ -41,7 +77,6 @@ Add to `Cargo.toml`:
 ferrite-core = { git = "https://github.com/clicker71/ap101", subdir = "codebase/ferrite-core" }
 
 [dev-dependencies]
-# ferrite-testkit brings in std support for verification
 ferrite-testkit = { git = "https://github.com/clicker71/ap101", subdir = "codebase/ferrite-testkit" }
 ```
 
@@ -161,51 +196,6 @@ STS-37/STS-40, and why this matters for modern silicon:
 
 ---
 
-## Real-World Proof: Clarus PACS
-
-This harness was born from **[Clarus PACS](https://github.com/clarus-pacs/clarus)** —
-an ultra-compact DICOMweb medical imaging server.
-
-When we first applied the AP-101B discipline to the Clarus Core deduplication
-pipeline, we exposed **128 000 unnecessary heap allocations per single CT study**
-caused by converting binary SHA-256 hashes into hex-encoded `String` values.
-
-By enforcing the `ap101` standard:
-
-- Replaced `String` hashes with raw stack-allocated `[u8; 32]` arrays.
-- Eliminated VR string parsing allocation storms.
-- Enforced zero-copy pixel extraction (`&[u8]` instead of `Vec<u8>`).
-
-```
-METRIC                                     BEFORE (HEX STRING)     AFTER ([U8; 32])
-ALLOCATIONS PER CT STUDY                   128 000                  0
-PER-STUDY HEAP CHURN                       ~22 MB                   ~5 MB
-CONCURRENT STOW INGESTIONS (256 MB RAM)    3 -> OOM-KILL             6+ (STABLE)
-CHUNKRECORD SIZE                           40 B (+ HEAP)            40 B (STACK-ONLY)
-PATIENT RE-IRRADIATION RISK                PRESENT                  ELIMINATED
-```
-
-On a modern server with 64 GB of RAM, the same fix means 128 000 fewer
-allocator calls per CT study, less heap fragmentation, lower allocator lock
-contention under concurrent load, and smoother latency tails. The discipline
-scales in both directions: it keeps budget hardware alive, and it keeps big
-hardware fast.
-
-> **The outcome was not just code optimization. It was reduced risk of
-> patient re-irradiation.** On a budget ARM single-board computer or
-> repurposed x86 workstation pulled from a junk closet — the kind of
-> hardware a regional hospital might run a PACS server on — a CT scanner's
-> controller runs
-> out of memory, it drops the study. The patient must be called back for
-> a repeat scan — extra radiation dose, extra cost, extra time. The
-> AP-101B discipline eliminated that failure mode entirely.
-> `Definitum semel.`
-
-We share this test harness because every byte counts — in space, in medicine,
-in any system where failure is not an option.
-
----
-
 ## What It Does
 
 `ferrite-core` is a `no_std` Rust library providing:
@@ -226,69 +216,6 @@ in any system where failure is not an option.
 - **`TestAllocator`** — global allocator wrapper to verify zero heap allocations
   in code under test.
 - **SEU strategies** — proptest generators for single-event upset simulation.
-
----
-
-### Proof: Clarus Core
-
-The discipline was born from [Clarus PACS](https://github.com/clarus-pacs/clarus),
-a DICOMweb medical imaging server. The same code that had 128 000 allocations
-per CT study in chunk dedup. The same code we fixed.
-
-We created `examples/clarus-audit/` — a cross-project audit harness that
-copies the EXACT production structs from Clarus Core and runs the full
-AP-101B + AP-101S discipline against them:
-
-```bash
-cargo test -p clarus-audit ap101b_clarus_audit -- --nocapture
-cargo test -p clarus-audit ap101s_clarus_audit -- --nocapture
-```
-
-**B-Model (ferrite core) audit of Clarus Core:**
-
-```
-╔════════════════════════════════════════════════════════════════╗
-║ IBM AP-101B FERRITE CORE DISCIPLINE SUITE v3.0                 ║
-║ TARGET: CLARUS CORE v0.3.0-alpha                               ║
-╚════════════════════════════════════════════════════════════════╝
-[ COMPLIANT ] AP101B-CORE-01 | ChunkRecord Geometry                     | Expected 40B, got 40B
-[ COMPLIANT ] AP101B-CORE-02 | DicomElement Geometry                    | Expected 12B, got 12B | vr: [u8;2] — ZERO HEAP
-[ COMPLIANT ] AP101B-CORE-03 | InstanceMeta Geometry                    | Expected 212B, got 212B
-[ COMPLIANT ] AP101B-CORE-04 | InstanceMeta SEU (1000 flips)            | All bit-flips detected
-[ COMPLIANT ] AP101B-CORE-05 | Zero Hidden Padding                      | Verified at compile time via assert_no_padding!
-╔════════════════════════════════════════════════════════════════╗
-║ MISSION STATUS: GO FOR LAUNCH.                                 ║
-╚════════════════════════════════════════════════════════════════╝
-```
-
-**S-Model (CMOS) audit of Clarus Core — adds multi-bit SEU burst detection:**
-
-```
-╔════════════════════════════════════════════════════════════════╗
-║ IBM AP-101S CMOS FERRITE DISCIPLINE SUITE v3.0                 ║
-║ TARGET: CLARUS CORE v0.3.0-alpha (CMOS)                        ║
-╚════════════════════════════════════════════════════════════════╝
-[ COMPLIANT ] AP101S-CMOS-01 | ChunkRecord Geometry                     | Expected 40B, got 40B
-[ COMPLIANT ] AP101S-CMOS-02 | DicomElement Geometry                    | Expected 12B, got 12B | vr: [u8;2] — ZERO HEAP
-[ COMPLIANT ] AP101S-CMOS-03 | InstanceMeta Geometry                    | Expected 212B, got 212B
-[ COMPLIANT ] AP101S-CMOS-04 | Multi-Bit SEU (1000 bursts, 2-8 bit)     | All bursts detected by CRC-32
-[ COMPLIANT ] AP101S-CMOS-05 | InstanceMeta SEU (1000 flips)            | All bit-flips detected
-[ COMPLIANT ] AP101S-CMOS-06 | Zero Hidden Padding                      | Verified at compile time via assert_no_padding!
-╔════════════════════════════════════════════════════════════════╗
-║ MISSION STATUS: GO FOR LAUNCH.                                 ║
-╚════════════════════════════════════════════════════════════════╝
-```
-
-**BEFORE/AFTER — FMA-02 MOTIVATING EXAMPLE (CLARUS CHUNK DEDUP):**
-
-```
-                              BEFORE (HEX STRING)     AFTER ([U8; 32])
-ALLOCATIONS PER CT STUDY      128 000                  0
-PER-STUDY HEAP CHURN          ~22 MB                   ~5 MB
-CONCURRENT STOW (256 MB RAM)  3 -> OOM-KILL             6+ (STABLE)
-CHUNKRECORD SIZE              40 B (+ HEAP)            40 B (STACK-ONLY)
-PATIENT RE-IRRADIATION RISK   PRESENT                  ELIMINATED
-```
 
 ---
 
