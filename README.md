@@ -39,7 +39,7 @@
 ╚════════════════════════════════════════════════════════════════╝
 ```
 
-[▶ LAUNCHPAD: SUPPORT MISSION ON BOOSTY](https://boosty.to/clicker71/donate)
+    [▶ LAUNCHPAD: SUPPORT MISSION ON BOOSTY](https://boosty.to/clicker71/donate)
 
 ```
 ╔════════════════════════════════════════════════════════════════╗
@@ -156,13 +156,14 @@ By enforcing the `ap101` standard:
 - Eliminated VR string parsing allocation storms.
 - Enforced zero-copy pixel extraction (`&[u8]` instead of `Vec<u8>`).
 
-| Metric | Before (hex String) | After ([u8; 32]) |
-|:---|---:|---:|
-| Allocations per CT study | 128 000 | 0 |
-| Per-study heap churn | ~22 MB | ~5 MB |
-| Concurrent STOW ingestions (256 MB RAM) | 3 → OOM-kill | 6+ (stable) |
-| ChunkRecord size | 40 B (+ heap) | 40 B (stack-only) |
-| Patient re-irradiation risk | Present | Eliminated |
+```
+METRIC                                     BEFORE (HEX STRING)     AFTER ([U8; 32])
+ALLOCATIONS PER CT STUDY                   128 000                  0
+PER-STUDY HEAP CHURN                       ~22 MB                   ~5 MB
+CONCURRENT STOW INGESTIONS (256 MB RAM)    3 -> OOM-KILL             6+ (STABLE)
+CHUNKRECORD SIZE                           40 B (+ HEAP)            40 B (STACK-ONLY)
+PATIENT RE-IRRADIATION RISK                PRESENT                  ELIMINATED
+```
 
 On a modern server with 64 GB of RAM, the same fix means 128 000 fewer
 allocator calls per CT study, less heap fragmentation, lower allocator lock
