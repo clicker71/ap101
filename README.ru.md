@@ -2,9 +2,7 @@
 
 Инструмент контроля целостности памяти для окружений без стандартной библиотеки (no_std), созданный по образцу бортового компьютера IBM AP-101B космических челноков. Включает контрольные суммы CRC-32, имитацию одиночных сбоев и проверку плотной упаковки данных.
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Mission Status](https://img.shields.io/badge/AP--101-GO%20FOR%20LAUNCH-brightgreen)](https://github.com/clicker71/ap101)
-[![Boosty](https://img.shields.io/badge/Boosty-Поддержать-orange)](https://boosty.to/clicker71/donate)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE) [![Mission Status](https://img.shields.io/badge/AP--101-GO%20FOR%20LAUNCH-brightgreen)](https://github.com/clicker71/ap101) [![Boosty](https://img.shields.io/badge/Boosty-Поддержать-orange)](https://boosty.to/clicker71/donate)
 
 > [English version](./README.md) | [Английская версия](./README.md)
 
