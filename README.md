@@ -36,24 +36,16 @@
 ```
 ╔════════════════════════════════════════════════════════════════╗
 ║ MISSION SUPPORT / KEEP THE SERVERS ALIVE                       ║
-║                                                                ║
-║ PURPOSE:    Support infrastructure and open-source testing     ║
-║             servers for Clarus PACS.                           ║
-║                                                                ║
-║ IMPACT:     If this discipline saved your embedded system      ║
-║             from OOM, consider backing the launchpad.          ║
-║                                                                ║
-║ DEED:       Every contribution helps keep our compilation      ║
-║             servers alive and running.                         ║
-║                                                                ║
-║             +----------------------------------------+        ║
-║ LAUNCHPAD:  |   SUPPORT MISSION ON BOOSTY             |        ║
-║             +----------------------------------------+        ║
-║             Definitum semel.                                   ║
 ╚════════════════════════════════════════════════════════════════╝
 ```
 
-[SUPPORT MISSION ON BOOSTY](https://boosty.to/clicker71/donate)
+[▶ LAUNCHPAD: SUPPORT MISSION ON BOOSTY](https://boosty.to/clicker71/donate)
+
+```
+╔════════════════════════════════════════════════════════════════╗
+║ Definitum semel.                                               ║
+╚════════════════════════════════════════════════════════════════╝
+```
 
 ---
 
@@ -266,15 +258,16 @@ cargo test -p clarus-audit ap101s_clarus_audit -- --nocapture
 ╚════════════════════════════════════════════════════════════════╝
 ```
 
-**Before/After — FMA-02 motivating example (Clarus chunk dedup):**
+**BEFORE/AFTER — FMA-02 MOTIVATING EXAMPLE (CLARUS CHUNK DEDUP):**
 
-| Metric | Before (hex String) | After ([u8; 32]) |
-|:---|---:|---:|
-| Allocations per CT study | 128 000 | 0 |
-| Per-study heap churn | ~22 MB | ~5 MB |
-| Concurrent STOW ingestions (256 MB RAM) | 3 → OOM-kill | 6+ (stable) |
-| ChunkRecord size | 40 B (+ heap) | 40 B (stack-only) |
-| Patient re-irradiation risk | Present | Eliminated |
+```
+                              BEFORE (HEX STRING)     AFTER ([U8; 32])
+ALLOCATIONS PER CT STUDY      128 000                  0
+PER-STUDY HEAP CHURN          ~22 MB                   ~5 MB
+CONCURRENT STOW (256 MB RAM)  3 -> OOM-KILL             6+ (STABLE)
+CHUNKRECORD SIZE              40 B (+ HEAP)            40 B (STACK-ONLY)
+PATIENT RE-IRRADIATION RISK   PRESENT                  ELIMINATED
+```
 
 ---
 
@@ -413,10 +406,15 @@ ap101/
 
 ## Naming Convention
 
-| ID Prefix | Model | Memory Tech | Word Size | Capacity | Era |
-|:---|:---|:---|:---|:---|:---|
-| `AP101B-CORE-` | IBM AP-101**B** | Ferrite core (Core Storage Module) | 32-bit | ~416 KB phys, ~256 KB usable | 1981–1990. Last flight: STS-40 (1991) |
-| `AP101S-CMOS-` | IBM AP-101**S** | CMOS SRAM (batt-backed) + DRAM/ECC | 32-bit | 256K words (1 MB) | 1991–2011. First flight: STS-37 (1991). SEU first detected here. |
+```
+ID PREFIX        AP101B-CORE-                         AP101S-CMOS-
+MODEL            IBM AP-101B                          IBM AP-101S
+MEMORY TECH      FERRITE CORE (CORE STORAGE MODULE)    CMOS SRAM (BATT-BACKED) + DRAM/ECC
+WORD SIZE        32-BIT                               32-BIT
+CAPACITY         ~416 KB PHYS, ~256 KB USABLE         256K WORDS (1 MB)
+ERA              1981-1990. LAST FLIGHT: STS-40       1991-2011. FIRST FLIGHT: STS-37.
+                 (1991)                               SEU FIRST DETECTED HERE.
+```
 
 ### Test Filtering
 
@@ -437,22 +435,28 @@ PROPTEST_CASES=10000 cargo test -p ap101s-cmos prop_burst_seu_detection
 The `ferrite-core` and `ferrite-testkit` libraries are model-agnostic.
 Adding a new Shuttle computer variant requires only a new example crate:
 
-| Step | Effort | What to do |
-|:---|:---:|:---|
-| 1. New example | 5 min | `cargo new examples/ap101s-cmos` |
-| 2. Define struct | 15 min | `Ap101sState` — same pattern, different `EXPECTED_SIZE` |
-| 3. Write discipline test | 20 min | Copy `ap101b()` → `ap101s()`. Adjust: multi-bit SEU, ECC detection, battery retention |
-| 4. Filter | 0 min | `cargo test ap101s` — works immediately |
+```
+STEP                  EFFORT     WHAT TO DO
+1. NEW EXAMPLE        5 MIN      cargo new examples/ap101s-cmos
+2. DEFINE STRUCT      15 MIN     Ap101sState — SAME PATTERN, DIFFERENT EXPECTED_SIZE
+3. DISCIPLINE TEST    20 MIN     COPY ap101b() -> ap101s(). ADJUST: MULTI-BIT SEU, ECC, BATTERY
+4. FILTER             0 MIN      cargo test ap101s — WORKS IMMEDIATELY
+```
 
 **B-model vs S-model differences in tests:**
 
-| Aspect | AP-101B (ferrite core) | AP-101S (CMOS) |
-|:---|:---|:---|
-| Memory constraint | 256 KB usable | 1 MB |
-| SEU model | Single-bit flip (cosmic ray flips ferrite core). **Ferrite is naturally immune.** | Multi-bit burst (DRAM row upset). **CMOS is vulnerable.** First SEU detected: STS-37. |
-| Error detection | CRC-32 checksum | CRC-32 + ECC syndrome check |
-| Power loss | Total loss (ferrite is non-volatile but unpowered read = destructive) | SRAM battery retention test |
-| Struct size | 28–40 bytes (compact structs) | Up to 128 bytes (ECC overhead) |
+```
+ASPECT              AP-101B (FERRITE CORE)              AP-101S (CMOS)
+MEMORY CONSTRAINT   256 KB USABLE                       1 MB
+SEU MODEL           SINGLE-BIT FLIP. FERRITE IS         MULTI-BIT BURST (DRAM ROW UPSET).
+                    NATURALLY IMMUNE.                   CMOS IS VULNERABLE. FIRST SEU
+                                                        DETECTED: STS-37.
+ERROR DETECTION     CRC-32 CHECKSUM                     CRC-32 + ECC SYNDROME CHECK
+POWER LOSS          TOTAL LOSS. FERRITE IS NON-         SRAM BATTERY RETENTION TEST
+                    VOLATILE BUT UNPOWERED READ
+                    = DESTRUCTIVE.
+STRUCT SIZE         28-40 BYTES (COMPACT STRUCTS)       UP TO 128 BYTES (ECC OVERHEAD)
+```
 
 > **Note on the S-model:** The AP-101S used semiconductor memory (CMOS SRAM/DRAM), not ferrite cores. It has its own discipline — `ap101s-cmos` — with checks specific to CMOS: ECC syndrome verification, multi-bit SEU bursts, and SRAM battery retention. Both models share `ferrite-core` primitives (CRC-32, structural audit, `assert_no_padding!`); the S-model adds ECC on top. Both models are tested; they simply protect against different physics.
 
