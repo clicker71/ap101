@@ -46,11 +46,14 @@
 ║ DEED:       Every contribution helps keep our compilation      ║
 ║             servers alive and running.                         ║
 ║                                                                ║
-║              Definitum semel.                                  ║
+║             +----------------------------------------+        ║
+║ LAUNCHPAD:  |   SUPPORT MISSION ON BOOSTY             |        ║
+║             +----------------------------------------+        ║
+║             Definitum semel.                                   ║
 ╚════════════════════════════════════════════════════════════════╝
 ```
 
-[SUPPORT MISSION →](https://boosty.to/clicker71/donate)
+[SUPPORT MISSION ON BOOSTY](https://boosty.to/clicker71/donate)
 
 ---
 
@@ -320,18 +323,18 @@ Clarus Core S-model — return **GO FOR LAUNCH**. The discipline holds.
 
 ---
 
-## Roadmap
+## ROADMAP
 
-| Version | Feature | Status |
-|:---|:---|:---:|
-| **v0.1.1** | Criterion benchmarks — Clarus before/after (ns/op, latency tails) | ⬜ |
-| **v0.1.1** | Cache-line analysis in `GeometryReport` (false sharing detection) | ⬜ |
-| **v0.2.0** | `#[derive(FerriteDiscipline)]` — one annotation: geometry + padding + CRC | ⬜ |
-| **v0.2.0** | HFT/GameDev feature profiles (`features = ["hft"]`) | ⬜ |
-| **v0.2.0** | `cargo-ap101` CI plugin — fails build on `String` in hot function | ⬜ |
-| **v0.2.0** | Spatial burst SEU (2–4 adjacent cells, S-model) | ⬜ |
-| **v0.3.0** | `const fn` CRC-32 (nightly) | ⬜ |
-| **v0.3.0** | Article: «How we removed 128 000 allocations with 1981 Shuttle discipline» | ⬜ |
+```
+V0.1.1  CRITERION BENCHMARKS — CLARUS BEFORE/AFTER (NS/OP, LATENCY TAILS)
+V0.1.1  CACHE-LINE ANALYSIS IN GEOMETRYREPORT (FALSE SHARING DETECTION)
+V0.2.0  #[DERIVE(FERRITEDISCIPLINE)] — ONE ANNOTATION: GEOMETRY + PADDING + CRC
+V0.2.0  HFT/GAMEDEV FEATURE PROFILES (FEATURES = ["HFT"])
+V0.2.0  CARGO-AP101 CI PLUGIN — FAILS BUILD ON STRING IN HOT FUNCTION
+V0.2.0  SPATIAL BURST SEU (2-4 ADJACENT CELLS, S-MODEL)
+V0.3.0  CONST FN CRC-32 (NIGHTLY)
+V0.3.0  ARTICLE — 128 000 ALLOCS REMOVED WITH 1981 SHUTTLE DISCIPLINE
+```
 
 ---
 
