@@ -39,7 +39,7 @@
 ╚════════════════════════════════════════════════════════════════╝
 ```
 
-    [▶ LAUNCHPAD: SUPPORT MISSION ON BOOSTY](https://boosty.to/clicker71/donate)
+[▶ LAUNCHPAD: SUPPORT MISSION ON BOOSTY](https://boosty.to/clicker71/donate)
 
 ```
 ╔════════════════════════════════════════════════════════════════╗
