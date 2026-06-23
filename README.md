@@ -337,6 +337,14 @@ Clarus Core S-model — return **GO FOR LAUNCH**. The discipline holds.
 
 ---
 
+## Engineering Discipline & Boundaries
+
+This project values architectural rigor over blind abstraction. For a transparent
+breakdown of our engineering assumptions, blind spots, and architectural
+constraints, read **[DECISIONS.md](./DECISIONS.md)**.
+
+---
+
 ## ROADMAP
 
 ```
