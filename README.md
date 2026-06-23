@@ -190,10 +190,6 @@ protect against.
 and test software-level fault-tolerant algorithms (CRC-32, XorFold, ECC)
 to guarantee data integrity when the physical silicon fails.
 
-**Full historical context** — the Shuttle's ferrite-to-CMOS transition,
-STS-37/STS-40, and why this matters for modern silicon:
-**[AP-101 STS Flight History](./HISTORY.md)**.
-
 ---
 
 ## What It Does
@@ -216,6 +212,53 @@ STS-37/STS-40, and why this matters for modern silicon:
 - **`TestAllocator`** — global allocator wrapper to verify zero heap allocations
   in code under test.
 - **SEU strategies** — proptest generators for single-event upset simulation.
+
+---
+
+### Proof: Clarus Core
+
+Cross-project audit of Clarus PACS production structs — the same code
+that had 128 000 allocations per CT study. The harness verifies geometry,
+padding, and SEU resilience of real-world medical data structures:
+
+```bash
+cargo test -p clarus-audit -- --nocapture
+```
+
+**B-Model audit:**
+
+```
+╔════════════════════════════════════════════════════════════════╗
+║ IBM AP-101B FERRITE CORE DISCIPLINE SUITE v3.0                 ║
+║ TARGET: CLARUS CORE v0.3.0-alpha                               ║
+╚════════════════════════════════════════════════════════════════╝
+[ COMPLIANT ] AP101B-CORE-01 | ChunkRecord Geometry                     | Expected 40B, got 40B
+[ COMPLIANT ] AP101B-CORE-02 | DicomElement Geometry                    | Expected 12B, got 12B | vr: [u8;2] — ZERO HEAP
+[ COMPLIANT ] AP101B-CORE-03 | InstanceMeta Geometry                    | Expected 212B, got 212B
+[ COMPLIANT ] AP101B-CORE-04 | InstanceMeta SEU (1000 flips)            | All bit-flips detected
+[ COMPLIANT ] AP101B-CORE-05 | Zero Hidden Padding                      | Verified at compile time via assert_no_padding!
+╔════════════════════════════════════════════════════════════════╗
+║ MISSION STATUS: GO FOR LAUNCH.                                 ║
+╚════════════════════════════════════════════════════════════════╝
+```
+
+**S-Model audit — adds multi-bit SEU burst detection:**
+
+```
+╔════════════════════════════════════════════════════════════════╗
+║ IBM AP-101S CMOS FERRITE DISCIPLINE SUITE v3.0                 ║
+║ TARGET: CLARUS CORE v0.3.0-alpha (CMOS)                        ║
+╚════════════════════════════════════════════════════════════════╝
+[ COMPLIANT ] AP101S-CMOS-01 | ChunkRecord Geometry                     | Expected 40B, got 40B
+[ COMPLIANT ] AP101S-CMOS-02 | DicomElement Geometry                    | Expected 12B, got 12B | vr: [u8;2] — ZERO HEAP
+[ COMPLIANT ] AP101S-CMOS-03 | InstanceMeta Geometry                    | Expected 212B, got 212B
+[ COMPLIANT ] AP101S-CMOS-04 | Multi-Bit SEU (1000 bursts, 2-8 bit)     | All bursts detected by CRC-32
+[ COMPLIANT ] AP101S-CMOS-05 | InstanceMeta SEU (1000 flips)            | All bit-flips detected
+[ COMPLIANT ] AP101S-CMOS-06 | Zero Hidden Padding                      | Verified at compile time via assert_no_padding!
+╔════════════════════════════════════════════════════════════════╗
+║ MISSION STATUS: GO FOR LAUNCH.                                 ║
+╚════════════════════════════════════════════════════════════════╝
+```
 
 ---
 
