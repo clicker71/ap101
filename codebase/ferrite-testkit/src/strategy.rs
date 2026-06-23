@@ -77,13 +77,19 @@ where
 ///
 /// IF `byte_offset + (bit_count / 8) + 1 >= data.len()`.
 pub fn inject_burst_error(data: &mut [u8], byte_offset: usize, bit_count: u8) {
-    assert!((2..=8).contains(&bit_count),
-        "BURST ERROR: bit_count MUST BE 2..=8");
+    assert!(
+        (2..=8).contains(&bit_count),
+        "BURST ERROR: bit_count MUST BE 2..=8"
+    );
     let total_bits = bit_count as usize;
     let end_byte = byte_offset + (total_bits / 8) + 1;
-    assert!(end_byte <= data.len(),
+    assert!(
+        end_byte <= data.len(),
         "BURST ERROR: offset {} + bits {} exceeds data length {}",
-        byte_offset, bit_count, data.len());
+        byte_offset,
+        bit_count,
+        data.len()
+    );
 
     let mut remaining = total_bits;
     let mut byte_idx = byte_offset;

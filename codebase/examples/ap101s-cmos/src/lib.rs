@@ -8,8 +8,8 @@
 // CONSTRAINTS:   1 MB CMOS SRAM + DRAM/ECC. NO HEAP WITHOUT CAUSE.
 //--------------------------------------------------------------------
 
-use ferrite_core::checksum::{Checksum, Crc32};
 use ferrite_core::as_bytes;
+use ferrite_core::checksum::{Checksum, Crc32};
 
 /// AP-101S CMOS NAVIGATION SYSTEM STATE.
 ///
@@ -40,9 +40,9 @@ pub struct Ap101sNavigationState {
     pub velocity_y: f32,
     pub velocity_z: f32,
     pub status_flags: u32,
-    pub ecc_syndrome: u32,    // ECC SYNDROME FOR DRAM ROW PROTECTION
-    pub battery_flag: u8,     // SRAM BATTERY STATUS (0x5A = OK, 0x00 = LOST)
-    pub checksum: u32,        // CRC-32/ISO-HDLC OVER ALL FIELDS
+    pub ecc_syndrome: u32, // ECC SYNDROME FOR DRAM ROW PROTECTION
+    pub battery_flag: u8,  // SRAM BATTERY STATUS (0x5A = OK, 0x00 = LOST)
+    pub checksum: u32,     // CRC-32/ISO-HDLC OVER ALL FIELDS
 }
 
 // COMPILE-TIME ZERO-PADDING CHECK
@@ -67,7 +67,7 @@ impl Default for Ap101sNavigationState {
             velocity_z: 0.0,
             status_flags: 0,
             ecc_syndrome: 0,
-            battery_flag: 0x5A,  // BATTERY OK
+            battery_flag: 0x5A, // BATTERY OK
             checksum: 0,
         };
         state.checksum = state.compute_checksum();

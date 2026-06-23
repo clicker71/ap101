@@ -17,20 +17,10 @@ pub struct IbmCrt;
 #[cfg(feature = "std")]
 impl IbmCrt {
     pub fn print_header(system: &str, subsystem: &str) {
-        println!(
-            "\n╔════════════════════════════════════════════════════════════════╗"
-        );
-        println!(
-            "║ IBM {:<58}║",
-            system
-        );
-        println!(
-            "║ TARGET: {:<54}║",
-            subsystem
-        );
-        println!(
-            "╚════════════════════════════════════════════════════════════════╝"
-        );
+        println!("\n╔════════════════════════════════════════════════════════════════╗");
+        println!("║ IBM {:<58}║", system);
+        println!("║ TARGET: {:<54}║", subsystem);
+        println!("╚════════════════════════════════════════════════════════════════╝");
     }
 
     pub fn print_row(prefix: &str, id: &str, verification: &str, passed: bool, detail: &str) {
@@ -39,21 +29,13 @@ impl IbmCrt {
     }
 
     pub fn print_footer(all_clear: bool) {
-        println!(
-            "╔════════════════════════════════════════════════════════════════╗"
-        );
+        println!("╔════════════════════════════════════════════════════════════════╗");
         if all_clear {
-            println!(
-                "║ MISSION STATUS: GO FOR LAUNCH.                               ║"
-            );
+            println!("║ MISSION STATUS: GO FOR LAUNCH.                               ║");
         } else {
-            println!(
-                "║ MISSION STATUS: ABORT. VIOLATION DETECTED.                   ║"
-            );
+            println!("║ MISSION STATUS: ABORT. VIOLATION DETECTED.                   ║");
         }
-        println!(
-            "╚════════════════════════════════════════════════════════════════╝\n"
-        );
+        println!("╚════════════════════════════════════════════════════════════════╝\n");
     }
 }
 

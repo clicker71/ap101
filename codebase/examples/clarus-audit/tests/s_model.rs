@@ -9,11 +9,11 @@
 // CONSTRAINTS:   CMOS SRAM + DRAM/ECC audit of Clarus Core structs.
 //--------------------------------------------------------------------
 
+use clarus_audit::{ChunkRecord, DicomElement, InstanceMeta};
 use ferrite_core::audit::audit_exact_size;
 use ferrite_core::cell::FerriteCell;
 use ferrite_core::telemetry::IbmCrt;
 use ferrite_testkit::inject_burst_error;
-use clarus_audit::{ChunkRecord, DicomElement, InstanceMeta};
 use rand::Rng;
 
 const CHUNK_RECORD_SIZE: usize = 40;
@@ -23,24 +23,51 @@ const INSTANCE_META_SIZE: usize = 212;
 #[test]
 fn ap101s_clarus_audit() {
     let mut all_clear = true;
-    IbmCrt::print_header("AP-101S CMOS FERRITE DISCIPLINE SUITE v3.0", "CLARUS CORE v0.3.0-alpha (CMOS)");
+    IbmCrt::print_header(
+        "AP-101S CMOS FERRITE DISCIPLINE SUITE v3.0",
+        "CLARUS CORE v0.3.0-alpha (CMOS)",
+    );
 
     // --- AP101S-CMOS-01: ChunkRecord geometry ---
     let report = audit_exact_size::<ChunkRecord>(CHUNK_RECORD_SIZE);
-    IbmCrt::print_row("AP101S-CMOS-", "01", "ChunkRecord Geometry", report.compliant,
-        &format!("Expected {}B, got {}B", CHUNK_RECORD_SIZE, report.size_bytes));
+    IbmCrt::print_row(
+        "AP101S-CMOS-",
+        "01",
+        "ChunkRecord Geometry",
+        report.compliant,
+        &format!(
+            "Expected {}B, got {}B",
+            CHUNK_RECORD_SIZE, report.size_bytes
+        ),
+    );
     all_clear &= report.compliant;
 
     // --- AP101S-CMOS-02: DicomElement geometry ---
     let report = audit_exact_size::<DicomElement>(DICOM_ELEMENT_SIZE);
-    IbmCrt::print_row("AP101S-CMOS-", "02", "DicomElement Geometry", report.compliant,
-        &format!("Expected {}B, got {}B | vr: [u8;2] — ZERO HEAP", DICOM_ELEMENT_SIZE, report.size_bytes));
+    IbmCrt::print_row(
+        "AP101S-CMOS-",
+        "02",
+        "DicomElement Geometry",
+        report.compliant,
+        &format!(
+            "Expected {}B, got {}B | vr: [u8;2] — ZERO HEAP",
+            DICOM_ELEMENT_SIZE, report.size_bytes
+        ),
+    );
     all_clear &= report.compliant;
 
     // --- AP101S-CMOS-03: InstanceMeta geometry ---
     let report = audit_exact_size::<InstanceMeta>(INSTANCE_META_SIZE);
-    IbmCrt::print_row("AP101S-CMOS-", "03", "InstanceMeta Geometry", report.compliant,
-        &format!("Expected {}B, got {}B", INSTANCE_META_SIZE, report.size_bytes));
+    IbmCrt::print_row(
+        "AP101S-CMOS-",
+        "03",
+        "InstanceMeta Geometry",
+        report.compliant,
+        &format!(
+            "Expected {}B, got {}B",
+            INSTANCE_META_SIZE, report.size_bytes
+        ),
+    );
     all_clear &= report.compliant;
 
     // --- AP101S-CMOS-04: Multi-bit SEU (1000 bursts, 2-8 bits) ---
@@ -73,8 +100,17 @@ fn ap101s_clarus_audit() {
         }
         ok
     };
-    IbmCrt::print_row("AP101S-CMOS-", "04", "Multi-Bit SEU (1000 bursts, 2-8 bit)", burst_ok,
-        if burst_ok { "All bursts detected by CRC-32" } else { "FAIL: Silent corruption" });
+    IbmCrt::print_row(
+        "AP101S-CMOS-",
+        "04",
+        "Multi-Bit SEU (1000 bursts, 2-8 bit)",
+        burst_ok,
+        if burst_ok {
+            "All bursts detected by CRC-32"
+        } else {
+            "FAIL: Silent corruption"
+        },
+    );
     all_clear &= burst_ok;
 
     // --- AP101S-CMOS-05: SEU single-bit resilience (1000 flips via FerriteCell) ---
@@ -99,15 +135,32 @@ fn ap101s_clarus_audit() {
         }
         ok
     };
-    IbmCrt::print_row("AP101S-CMOS-", "05", "InstanceMeta SEU (1000 flips)", seu_ok,
-        if seu_ok { "All bit-flips detected" } else { "FAIL" });
+    IbmCrt::print_row(
+        "AP101S-CMOS-",
+        "05",
+        "InstanceMeta SEU (1000 flips)",
+        seu_ok,
+        if seu_ok {
+            "All bit-flips detected"
+        } else {
+            "FAIL"
+        },
+    );
     all_clear &= seu_ok;
 
     // --- AP101S-CMOS-06: Zero hidden padding (compile-time) ---
-    IbmCrt::print_row("AP101S-CMOS-", "06", "Zero Hidden Padding", true,
-        "Verified at compile time via assert_no_padding!");
+    IbmCrt::print_row(
+        "AP101S-CMOS-",
+        "06",
+        "Zero Hidden Padding",
+        true,
+        "Verified at compile time via assert_no_padding!",
+    );
     // (compile-time check already passed if we got here)
 
     IbmCrt::print_footer(all_clear);
-    assert!(all_clear, "AP-101S CMOS ferrite discipline breached in Clarus Core!");
+    assert!(
+        all_clear,
+        "AP-101S CMOS ferrite discipline breached in Clarus Core!"
+    );
 }

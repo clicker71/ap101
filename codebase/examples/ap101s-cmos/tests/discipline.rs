@@ -9,10 +9,10 @@
 // CONSTRAINTS:   1 MB CMOS. ECC-PROTECTED DRAM.
 //--------------------------------------------------------------------
 
+use ap101s_cmos::Ap101sNavigationState;
 use ferrite_core::audit::{audit_exact_size, audit_size_and_align};
 use ferrite_core::telemetry::IbmCrt;
 use ferrite_testkit::inject_burst_error;
-use ap101s_cmos::Ap101sNavigationState;
 use proptest::prelude::*;
 use rand::Rng;
 
@@ -69,7 +69,11 @@ fn ap101s() {
         "03",
         "ECC Syndrome Check",
         ecc_ok,
-        if ecc_ok { "ECC detects field change" } else { "FAIL: ECC silent" },
+        if ecc_ok {
+            "ECC detects field change"
+        } else {
+            "FAIL: ECC silent"
+        },
     );
     all_clear &= ecc_ok;
 
@@ -115,7 +119,11 @@ fn ap101s() {
         "04",
         "Multi-Bit SEU Detection (2-8 bit)",
         burst_ok,
-        if burst_ok { "All bursts detected" } else { "FAIL: Silent corruption" },
+        if burst_ok {
+            "All bursts detected"
+        } else {
+            "FAIL: Silent corruption"
+        },
     );
     all_clear &= burst_ok;
 
@@ -134,7 +142,11 @@ fn ap101s() {
         "05",
         "Battery Retention",
         battery_ok,
-        if battery_ok { "0x5A=OK, 0x00=LOST" } else { "FAIL: Flag check broken" },
+        if battery_ok {
+            "0x5A=OK, 0x00=LOST"
+        } else {
+            "FAIL: Flag check broken"
+        },
     );
     all_clear &= battery_ok;
 

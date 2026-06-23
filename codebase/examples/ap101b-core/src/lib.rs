@@ -8,8 +8,8 @@
 // CONSTRAINTS:   256 KB USABLE CORE. NO HEAP WITHOUT CAUSE.
 //--------------------------------------------------------------------
 
-use ferrite_core::checksum::{Checksum, Crc32};
 use ferrite_core::as_bytes;
+use ferrite_core::checksum::{Checksum, Crc32};
 
 /// NAVIGATION SYSTEM STATE.
 ///
@@ -23,7 +23,7 @@ pub struct NavigationState {
     pub velocity_y: f32,
     pub velocity_z: f32,
     pub status_flags: u32,
-    pub checksum: u32,  // CRC-32/ISO-HDLC
+    pub checksum: u32, // CRC-32/ISO-HDLC
 }
 
 // COMPILE-TIME ZERO-PADDING CHECK

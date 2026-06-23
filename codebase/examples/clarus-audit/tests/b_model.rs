@@ -9,37 +9,64 @@
 // CONSTRAINTS:   Auditing Clarus Core v0.3.0-alpha production structs.
 //--------------------------------------------------------------------
 
+use clarus_audit::{ChunkRecord, DicomElement, InstanceMeta};
 use ferrite_core::audit::audit_exact_size;
 use ferrite_core::cell::FerriteCell;
 use ferrite_core::telemetry::IbmCrt;
-use clarus_audit::{ChunkRecord, DicomElement, InstanceMeta};
 use rand::Rng;
 
-const CHUNK_RECORD_SIZE: usize = 40;   // [u8;32] + usize
-const DICOM_ELEMENT_SIZE: usize = 12;  // u32 + [u8;2] + u32 (with alignment padding)
+const CHUNK_RECORD_SIZE: usize = 40; // [u8;32] + usize
+const DICOM_ELEMENT_SIZE: usize = 12; // u32 + [u8;2] + u32 (with alignment padding)
 const INSTANCE_META_SIZE: usize = 212; // 64*3 + 16 + 4
 
 #[test]
 fn ap101b_clarus_audit() {
     let mut all_clear = true;
-    IbmCrt::print_header("AP-101B FERRITE CORE DISCIPLINE SUITE v3.0", "CLARUS CORE v0.3.0-alpha");
+    IbmCrt::print_header(
+        "AP-101B FERRITE CORE DISCIPLINE SUITE v3.0",
+        "CLARUS CORE v0.3.0-alpha",
+    );
 
     // --- AP101B-CORE-01: ChunkRecord geometry ---
     let report = audit_exact_size::<ChunkRecord>(CHUNK_RECORD_SIZE);
-    IbmCrt::print_row("AP101B-CORE-", "01", "ChunkRecord Geometry", report.compliant,
-        &format!("Expected {}B, got {}B", CHUNK_RECORD_SIZE, report.size_bytes));
+    IbmCrt::print_row(
+        "AP101B-CORE-",
+        "01",
+        "ChunkRecord Geometry",
+        report.compliant,
+        &format!(
+            "Expected {}B, got {}B",
+            CHUNK_RECORD_SIZE, report.size_bytes
+        ),
+    );
     all_clear &= report.compliant;
 
     // --- AP101B-CORE-02: DicomElement geometry ---
     let report = audit_exact_size::<DicomElement>(DICOM_ELEMENT_SIZE);
-    IbmCrt::print_row("AP101B-CORE-", "02", "DicomElement Geometry", report.compliant,
-        &format!("Expected {}B, got {}B | vr: [u8;2] — ZERO HEAP", DICOM_ELEMENT_SIZE, report.size_bytes));
+    IbmCrt::print_row(
+        "AP101B-CORE-",
+        "02",
+        "DicomElement Geometry",
+        report.compliant,
+        &format!(
+            "Expected {}B, got {}B | vr: [u8;2] — ZERO HEAP",
+            DICOM_ELEMENT_SIZE, report.size_bytes
+        ),
+    );
     all_clear &= report.compliant;
 
     // --- AP101B-CORE-03: InstanceMeta geometry ---
     let report = audit_exact_size::<InstanceMeta>(INSTANCE_META_SIZE);
-    IbmCrt::print_row("AP101B-CORE-", "03", "InstanceMeta Geometry", report.compliant,
-        &format!("Expected {}B, got {}B", INSTANCE_META_SIZE, report.size_bytes));
+    IbmCrt::print_row(
+        "AP101B-CORE-",
+        "03",
+        "InstanceMeta Geometry",
+        report.compliant,
+        &format!(
+            "Expected {}B, got {}B",
+            INSTANCE_META_SIZE, report.size_bytes
+        ),
+    );
     all_clear &= report.compliant;
 
     // --- AP101B-CORE-04: SEU resilience (single-bit, 1000 flips) ---
@@ -65,15 +92,32 @@ fn ap101b_clarus_audit() {
         }
         ok
     };
-    IbmCrt::print_row("AP101B-CORE-", "04", "InstanceMeta SEU (1000 flips)", seu_ok,
-        if seu_ok { "All bit-flips detected" } else { "FAIL" });
+    IbmCrt::print_row(
+        "AP101B-CORE-",
+        "04",
+        "InstanceMeta SEU (1000 flips)",
+        seu_ok,
+        if seu_ok {
+            "All bit-flips detected"
+        } else {
+            "FAIL"
+        },
+    );
     all_clear &= seu_ok;
 
     // --- AP101B-CORE-05: Assert no padding (compile-time) ---
-    IbmCrt::print_row("AP101B-CORE-", "05", "Zero Hidden Padding", true,
-        "Verified at compile time via assert_no_padding!");
+    IbmCrt::print_row(
+        "AP101B-CORE-",
+        "05",
+        "Zero Hidden Padding",
+        true,
+        "Verified at compile time via assert_no_padding!",
+    );
     // (compile-time check already passed if we got here)
 
     IbmCrt::print_footer(all_clear);
-    assert!(all_clear, "AP-101B ferrite discipline breached in Clarus Core!");
+    assert!(
+        all_clear,
+        "AP-101B ferrite discipline breached in Clarus Core!"
+    );
 }

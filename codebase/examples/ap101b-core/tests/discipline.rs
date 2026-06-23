@@ -8,11 +8,11 @@
 // CONSTRAINTS:   256 KB USABLE CORE. RAND 0.8. PROPTEST 1.4.
 //--------------------------------------------------------------------
 
+use ap101b_core::NavigationState;
 use ferrite_core::audit::{audit_exact_size, audit_size_and_align};
 use ferrite_core::cell::FerriteCell;
 use ferrite_core::telemetry::IbmCrt;
-use ferrite_testkit::{byte_offset, bit_index};
-use ap101b_core::NavigationState;
+use ferrite_testkit::{bit_index, byte_offset};
 use proptest::prelude::*;
 use rand::Rng;
 
@@ -64,7 +64,7 @@ fn ap101b() {
     let speed_a = state_a.velocity_magnitude();
     let speed_b = state_b.velocity_magnitude();
     let diff = (speed_a - speed_b).abs();
-    let eps = 4.0 * f32::EPSILON * speed_a.max(speed_b);  // 4 ULP
+    let eps = 4.0 * f32::EPSILON * speed_a.max(speed_b); // 4 ULP
     let deterministic = diff <= eps;
 
     IbmCrt::print_row(
@@ -100,10 +100,7 @@ fn ap101b() {
 
             if unsafe { core::ptr::read(cell.as_ptr()) }.verify_integrity() {
                 ok = false;
-                eprintln!(
-                    "CRITICAL: SEU not detected at byte {}, bit {}",
-                    byte, bit
-                );
+                eprintln!("CRITICAL: SEU not detected at byte {}, bit {}", byte, bit);
             }
         }
         ok

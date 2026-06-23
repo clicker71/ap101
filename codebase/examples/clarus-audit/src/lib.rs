@@ -10,8 +10,8 @@
 // CONSTRAINTS:   Do NOT modify struct layouts. These are Clarus production.
 //--------------------------------------------------------------------
 
-use ferrite_core::checksum::{Checksum, Crc32};
 use ferrite_core::as_bytes;
+use ferrite_core::checksum::{Checksum, Crc32};
 
 //--------------------------------------------------------------------
 // CHUNKRECORD — from clarus-adapters/src/storage/chunk_store.rs
@@ -22,8 +22,8 @@ use ferrite_core::as_bytes;
 #[derive(Debug, Clone, Copy)]
 #[repr(C)]
 pub struct ChunkRecord {
-    pub hash: [u8; 32],      // SHA-256 digest — ZERO heap
-    pub block_index: usize,  // 8 bytes on 64-bit
+    pub hash: [u8; 32],     // SHA-256 digest — ZERO heap
+    pub block_index: usize, // 8 bytes on 64-bit
 }
 
 //--------------------------------------------------------------------
@@ -52,7 +52,7 @@ pub struct InstanceMeta {
     pub series_uid: [u8; 64],
     pub instance_uid: [u8; 64],
     pub modality: [u8; 16],
-    pub checksum: u32,  // CRC-32/ISO-HDLC
+    pub checksum: u32, // CRC-32/ISO-HDLC
 }
 
 impl Default for InstanceMeta {
