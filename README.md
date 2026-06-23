@@ -32,6 +32,41 @@
 ╚════════════════════════════════════════════════════════════════╝
 ```
 
+## Quick Start
+
+Add to `Cargo.toml`:
+
+```toml
+[dependencies]
+ferrite-core = { git = "https://github.com/clicker71/ap101", subdir = "codebase/ferrite-core" }
+
+[dev-dependencies]
+# ferrite-testkit brings in std support for verification
+ferrite-testkit = { git = "https://github.com/clicker71/ap101", subdir = "codebase/ferrite-testkit" }
+```
+
+Run the navigation example test suite:
+
+```bash
+cargo test -p ap101b-core
+```
+
+Expected output:
+
+```
+╔════════════════════════════════════════════════════════════════╗
+║ IBM AP-101B FERRITE CORE DISCIPLINE SUITE v3.0                 ║
+║ TARGET: NAVIGATION SYSTEM v1.0                                 ║
+╚════════════════════════════════════════════════════════════════╝
+[ COMPLIANT ] AP101B-CORE-01 | Struct Geometry & Alignment         | Size: 32B...
+[ COMPLIANT ] AP101B-CORE-02 | Zero Hidden Padding                 | ...
+[ COMPLIANT ] AP101B-CORE-04 | Deterministic Computation (±4 ULP)  | ...
+[ COMPLIANT ] AP101B-CORE-05 | Cosmic Ray SEU Resilience           | ...
+╔════════════════════════════════════════════════════════════════╗
+║ MISSION STATUS: GO FOR LAUNCH.                                 ║
+╚════════════════════════════════════════════════════════════════╝
+```
+
 ---
 
 ## The Illusion of High-Level Code
@@ -315,43 +350,6 @@ Clarus Core S-model — return **GO FOR LAUNCH**. The discipline holds.
 - [ ] V0.2.0  CROSS-PLATFORM TARGET ALIGNMENT CONTRACT (ARM/X86_64)
 - [ ] V0.3.0  CONST FN CRC-32 (NIGHTLY)
 - [ ] V0.3.0  ARTICLE — 128 000 ALLOCS REMOVED WITH 1981 SHUTTLE DISCIPLINE
-```
-
----
-
-## Quick Start
-
-Add to `Cargo.toml`:
-
-```toml
-[dependencies]
-ferrite-core = { git = "https://github.com/clicker71/ap101", subdir = "codebase/ferrite-core" }
-
-[dev-dependencies]
-# ferrite-testkit brings in std support for verification
-ferrite-testkit = { git = "https://github.com/clicker71/ap101", subdir = "codebase/ferrite-testkit" }
-```
-
-Run the navigation example test suite:
-
-```bash
-cargo test -p ap101b-core
-```
-
-Expected output:
-
-```
-╔════════════════════════════════════════════════════════════════╗
-║ IBM AP-101B FERRITE CORE DISCIPLINE SUITE v3.0                 ║
-║ TARGET: NAVIGATION SYSTEM v1.0                                 ║
-╚════════════════════════════════════════════════════════════════╝
-[ COMPLIANT ] AP101B-CORE-01 | Struct Geometry & Alignment         | Size: 32B...
-[ COMPLIANT ] AP101B-CORE-02 | Zero Hidden Padding                 | ...
-[ COMPLIANT ] AP101B-CORE-04 | Deterministic Computation (±4 ULP)  | ...
-[ COMPLIANT ] AP101B-CORE-05 | Cosmic Ray SEU Resilience           | ...
-╔════════════════════════════════════════════════════════════════╗
-║ MISSION STATUS: GO FOR LAUNCH.                                 ║
-╚════════════════════════════════════════════════════════════════╝
 ```
 
 ---
