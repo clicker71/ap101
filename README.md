@@ -46,8 +46,7 @@
 ║ DEED:       Every contribution helps keep our compilation      ║
 ║             servers alive and running.                         ║
 ║                                                                ║
-║ LINK:       [Support via Ko-fi](https://ko-fi.com/clicker71)   ║
-║             [Buy Me a Coffee](https://buymeacoffee.com)        ║
+║ LINK:       [Boosty](https://boosty.to/clicker71)              ║
 ║             Definitum semel.                                   ║
 ╚════════════════════════════════════════════════════════════════╝
 ```
@@ -317,6 +316,21 @@ that `ferrite-core` provides is verified by the same discipline:
 
 All four audit targets — B-model self, S-model self, Clarus Core B-model,
 Clarus Core S-model — return **GO FOR LAUNCH**. The discipline holds.
+
+---
+
+## Roadmap
+
+| Version | Feature | Status |
+|:---|:---|:---:|
+| **v0.1.1** | Criterion benchmarks — Clarus before/after (ns/op, latency tails) | ⬜ |
+| **v0.1.1** | Cache-line analysis in `GeometryReport` (false sharing detection) | ⬜ |
+| **v0.2.0** | `#[derive(FerriteDiscipline)]` — one annotation: geometry + padding + CRC | ⬜ |
+| **v0.2.0** | HFT/GameDev feature profiles (`features = ["hft"]`) | ⬜ |
+| **v0.2.0** | `cargo-ap101` CI plugin — fails build on `String` in hot function | ⬜ |
+| **v0.2.0** | Spatial burst SEU (2–4 adjacent cells, S-model) | ⬜ |
+| **v0.3.0** | `const fn` CRC-32 (nightly) | ⬜ |
+| **v0.3.0** | Article: «How we removed 128 000 allocations with 1981 Shuttle discipline» | ⬜ |
 
 ---
 

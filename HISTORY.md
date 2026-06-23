@@ -148,8 +148,3 @@ allocation, don't optimize the garbage collector.**
 
 - [IBM System/4 Pi](https://en.wikipedia.org/wiki/IBM_System/4_Pi) — Wikipedia
 - [IBM AP-101](https://en.wikipedia.org/wiki/IBM_AP-101) — Space Shuttle General Purpose Computer
-- [STS-37 Mission Report](https://ntrs.nasa.gov/citations/19910014838) (April 1991) — NASA Technical Reports Server
-- [STS-40 Mission Report](https://ntrs.nasa.gov/citations/19910017268) (June 1991) — NASA Technical Reports Server
-- [Single Event Upsets in Avionics](https://ntrs.nasa.gov/search?q=single+event+upset+avionics) — NASA Technical Reports Server
-- [ISO 26262: Road Vehicles — Functional Safety](https://www.iso.org/standard/68383.html)
-- [IEC 60601: Medical Electrical Equipment — Safety](https://www.iso.org/standard/65529.html)
