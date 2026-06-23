@@ -176,7 +176,10 @@ scales in both directions: it keeps budget hardware alive, and it keeps big
 hardware fast.
 
 > **The outcome was not just code optimization. It was reduced risk of
-> patient re-irradiation.** When a CT scanner's embedded controller runs
+> patient re-irradiation.** On a budget ARM single-board computer or
+> repurposed x86 workstation pulled from a junk closet — the kind of
+> hardware a regional hospital might run a PACS server on — a CT scanner's
+> controller runs
 > out of memory, it drops the study. The patient must be called back for
 > a repeat scan — extra radiation dose, extra cost, extra time. The
 > AP-101B discipline eliminated that failure mode entirely.
@@ -323,11 +326,11 @@ Add to `Cargo.toml`:
 
 ```toml
 [dependencies]
-ferrite-core = { git = "https://github.com/clicker71/ap101", package = "ferrite-core" }
+ferrite-core = { git = "https://github.com/clicker71/ap101", subdir = "codebase/ferrite-core" }
 
 [dev-dependencies]
 # ferrite-testkit brings in std support for verification
-ferrite-testkit = { git = "https://github.com/clicker71/ap101", package = "ferrite-testkit" }
+ferrite-testkit = { git = "https://github.com/clicker71/ap101", subdir = "codebase/ferrite-testkit" }
 ```
 
 Run the navigation example test suite:
