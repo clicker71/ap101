@@ -1,8 +1,8 @@
 # CI/CD — AP-101B FERRITE DISCIPLINE
 #
 # TRIGGER: PUSH TO MASTER, PULL REQUESTS.
-# JOBS: CARGO TEST, CLIPPY (DENY WARNINGS), MIRI (FERRITE-CORE ONLY), NO_STD BUILD.
-# MACHINE: UBUNTU-LATEST. RUST: STABLE.
+# JOBS: CARGO TEST (+SEU 10K), CLIPPY (DENY WARNINGS), MIRI, NO_STD BUILD, RUSTFMT.
+# MACHINE: UBUNTU-LATEST.
 
 name: CI
 
@@ -23,7 +23,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - run: cargo test --workspace
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/
+            ~/.cargo/git/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: ${{ runner.os }}-cargo-
+      - run: cargo test --workspace -- --nocapture
+      - name: SEU resilience (10k bit-flips)
+        run: |
+          cargo test -p ap101b-core prop_seu_detection -- --nocapture
+          cargo test -p ap101s-cmos prop_burst_seu_detection -- --nocapture
 
   clippy:
     name: cargo clippy
@@ -52,3 +65,13 @@ jobs:
         with:
           components: miri
       - run: cargo miri test -p ferrite-core
+
+  fmt:
+    name: cargo fmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - run: cargo fmt --all -- --check
