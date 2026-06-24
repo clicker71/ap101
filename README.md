@@ -174,21 +174,27 @@ and force aggressive Garbage Collection or thread-locking allocation waits.
 predictable structures drops CPU system overhead to zero. It translates
 directly to fewer cloud instances and massive operational cost reductions.
 
-### 4. Silicon Vulnerability — Radiation-Hardening at 3nm
+### 4. Silicon Vulnerability — Radiation-Hardening from 1991 to 3nm
 
-The Space Shuttle's AP-101B used magnetic ferrite core memory, naturally
-immune to cosmic rays. Modern sub-10nm silicon transistors are so
-microscopic that they are highly vulnerable to Single Event Upsets (SEU) —
-random, radiation-induced bit-flips caused by atmospheric neutrons right
-here on Earth.
+The Space Shuttle's AP-101B (1981–1990) used magnetic ferrite core memory —
+naturally immune to cosmic rays at the physics level. The **AP-101S** (1991–2011)
+was the first Shuttle computer to use semiconductor memory (CMOS SRAM/DRAM),
+and with it came the **first registered SEU** on STS-37. The era of software-level
+fault tolerance began.
 
-**The Trap:** High-altitude IoT, automotive safety controllers, and medical
-equipment suffer from silent data corruption that standard compilers cannot
-protect against.
+Today, at 3nm and below, the problem is exponentially worse. A single
+atmospheric neutron can flip bits in server RAM, automotive controllers,
+and medical equipment — on Earth, at sea level. The smaller the transistor,
+the lower the critical charge, the higher the SEU cross-section.
+
+**The Trap:** Shrinking process nodes make silent data corruption a
+statistical certainty for any sufficiently large deployment. Standard
+compilers offer zero protection.
 
 **The Discipline:** The SEU simulation in this harness forces you to write
 and test software-level fault-tolerant algorithms (CRC-32, XorFold, ECC)
-to guarantee data integrity when the physical silicon fails.
+to guarantee data integrity when the physical silicon fails — exactly as
+the aerospace industry learned the hard way in 1991.
 
 ---
 
