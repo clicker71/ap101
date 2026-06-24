@@ -268,6 +268,56 @@ cargo test -p clarus-audit -- --nocapture
 
 ---
 
+### Proof: Clarus Production Audit (Cross-Repo Integration Test)
+
+The discipline is applied as an **integration test inside the Clarus PACS
+repository itself**. This is not a curated model example — it is a direct audit
+of production code: domain models, storage layer, CJK charset detection, and
+JPEG2000 transfer syntax constants.
+
+Run from the Clarus repo:
+
+```bash
+cargo test -p clarus-testing --test ap101_audit -- --nocapture
+```
+
+**Domain models — honest violations (expected for DTOs):**
+
+```
+[ANOMALY DET] AP101B-CORE-10 | Patient Geometry                         | 112B
+[ANOMALY DET] AP101B-CORE-11 | Study Geometry                           | 368B
+[ANOMALY DET] AP101B-CORE-12 | Series Geometry                          | 168B
+[ANOMALY DET] AP101B-CORE-13 | Instance Geometry                        | 184B
+[ANOMALY DET] AP101B-CORE-14 | WorkItem Geometry                        | 376B
+MISSION STATUS: ABORT. VIOLATION DETECTED.
+```
+
+Domain models use `String`/`Option<String>` for DICOM attributes. Hidden heap
+pointers and padding are unavoidable for data transfer objects. The test
+correctly flags them — structural discipline is not required for DTOs, only
+for the hot path.
+
+**Hot path — all clear:**
+
+```
+[ COMPLIANT ] AP101B-CORE-20 | ChunkHash [u8; 32]                       | ZERO HEAP
+[ COMPLIANT ] AP101B-CORE-30 | Charset Chinese/Japanese/Korean/Georgian  | Pure compute
+[ COMPLIANT ] AP101B-CORE-40 | JPEG2000 Transfer Syntax UIDs             | Constants
+MISSION STATUS: GO FOR LAUNCH.
+```
+
+The storage layer (`[u8; 32]` chunk hash), charset detection (pure functions,
+no allocation), and JPEG2000 codec constants (compile-time strings) are all
+ferrite-compliant. This is the code that processes gigabytes of multi-frame
+DICOM pixel data — and it runs with zero heap churn.
+
+The test was deliberately not "fudged" to hide the domain model violations.
+It reports them honestly, demonstrating that the discipline distinguishes
+between what must be ferrite-compliant (hot path) and what cannot be (DTOs
+with variable-length DICOM attributes).
+
+---
+
 ### Proof: Self-Test
 
 The discipline auditing itself (meta-circular verification).
