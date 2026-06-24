@@ -104,6 +104,11 @@ Expected output:
 
 ---
 
+**[DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)** — full guide: writing tests, CI setup,
+understanding failures, common pitfalls, reference projects.
+
+---
+
 ## The Illusion of High-Level Code
 
 Modern software engineering has grown lazy. High-level languages and frameworks
