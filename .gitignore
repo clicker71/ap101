@@ -3,6 +3,9 @@
 # Confidential/ — plans, prompts, analysis. NEVER commit.
 Confidential/
 
+# future-plan.md — internal README/marketing plan (owner). NEVER commit.
+future-plan.md
+
 target/
 **/*.rs.bk
 *.swp
