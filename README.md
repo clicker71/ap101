@@ -33,8 +33,8 @@ fragmentation, or silent data corruption caused by unstable hardware.
   a SHA-256 digest field crossing a 64-byte cache line in the study-instance
   record — fixed before false sharing could tax the indexing hot path.
 - **Query hot path, zero-heap by construction:** QIDO CBOR→JSON streaming
-  removed one allocation per response — at 100 QIDO/s that is an estimated
-  **8.6M heap allocations/day** avoided.
+  removed one allocation per response → ≈8.6M heap allocations/day avoided —
+  estimate at 100 QIDO/s (100 × 86 400), computed, not measured.
 - **The gate audits itself:** the Clarus audit exposed a flaw in
   `TestAllocator` itself — shared counters polluted by parallel test threads.
   The enforcer now measures per-thread; a gate that lies is worse than none.
