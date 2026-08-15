@@ -29,6 +29,18 @@ fragmentation, or silent data corruption caused by unstable hardware.
 
 - **Zero-Heap Reinforcement:** Slashed run-time allocations from **128 000 to
   exactly 0** per computed tomography (CT) study ingestion.
+- **Cache-line surgery on live structs:** the `cache_line_fields!` gate found
+  a SHA-256 digest field crossing a 64-byte cache line in the study-instance
+  record — fixed before false sharing could tax the indexing hot path.
+- **Query hot path, zero-heap by construction:** QIDO CBOR→JSON streaming
+  removed one allocation per response — at 100 QIDO/s that is an estimated
+  **8.6M heap allocations/day** avoided.
+- **The gate audits itself:** the Clarus audit exposed a flaw in
+  `TestAllocator` itself — shared counters polluted by parallel test threads.
+  The enforcer now measures per-thread; a gate that lies is worse than none.
+- **Numbers, not adjectives:** the ingestion parse path benchmarks at
+  **~309 ns** against a 5 µs CI budget (full numbers and findings journal
+  below).
 - **Target hardware profile:** designed for cheap ARM single-board computers
   and repurposed x86 workstations in regional clinics. The discipline scales
   in both directions: keeps budget hardware alive, keeps big hardware fast.
