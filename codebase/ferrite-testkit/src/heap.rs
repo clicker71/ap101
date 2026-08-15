@@ -6,21 +6,35 @@
 // AUTHOR:        Daniil Solgalov <clicker71@github>
 // DATE:          2026-06-22
 // MACHINE:       IBM AP-101B (HONORARY)
-// CONSTRAINTS:   NOT REENTRANT. MULTITHREADING REQUIRES ISOLATED PROCESS.
+// CONSTRAINTS:   PER-THREAD COUNTERS. FOREIGN THREADS DO NOT POLLUTE.
 //--------------------------------------------------------------------
 
 use std::alloc::{GlobalAlloc, Layout, System};
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::cell::Cell;
+
+// PER-THREAD ALLOCATION COUNTERS.
+//
+// WHY THREAD-LOCAL: THE PREVIOUS GLOBAL `AtomicUsize` COUNTERS WERE
+// POLLUTED BY ALLOCATIONS FROM OTHER THREADS IN THE SAME PROCESS
+// (LIBTEST HARNESS OUTPUT/CAPTURE THREADS), CAUSING RARE FLAKY
+// FAILURES IN SINGLE-THREADED ZERO-ALLOC TESTS. A MEASUREMENT WINDOW
+// NOW OBSERVES ONLY ALLOCATIONS PERFORMED ON THE MEASURING THREAD.
+thread_local! {
+    static COUNTERS: Cell<(usize, usize)> = const { Cell::new((0, 0)) };
+    static ENABLED: Cell<bool> = const { Cell::new(true) };
+}
 
 /// GLOBAL ALLOCATOR FOR TEST ISOLATION.
 ///
-/// ## KNOWN LIMITATION: BYTE COUNTER DRIFT
+/// COUNTERS ARE **PER-THREAD**. FOREIGN THREADS NO LONGER POLLUTE
+/// THE SNAPSHOT COMPARISON.
 ///
-/// IF `set_enabled(false)` IS CALLED BETWEEN `alloc` AND `dealloc`,
-/// THE `bytes` COUNTER IS NOT DECREMENTED, CAUSING PERMANENT DRIFT.
-/// USE `reset()` TO ZERO COUNTERS BEFORE EACH TEST.
-/// FOR MULTITHREADED TESTS, USE `execute_on_ferrite_core_with`
-/// WITH A FRESH `TestAllocator` INSTANCE PER THREAD.
+/// ## TRADEOFF
+///
+/// ALLOCATIONS PERFORMED BY A WORKER THREAD SPAWNED INSIDE `f` ARE
+/// NOT ATTRIBUTED TO THE MEASURING THREAD. THE ZERO-ALLOC GATE COVERS
+/// SINGLE-THREADED HOTPATHS; MULTITHREADED CODE STILL REQUIRES AN
+/// ISOLATED PROCESS (API CONTRACT, UNCHANGED).
 ///
 /// ## USAGE
 ///
@@ -32,39 +46,27 @@ use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 /// THEN CALL `execute_on_ferrite_core` TO VERIFY
 /// YOUR CODE PERFORMS ZERO ALLOCATIONS.
 pub struct TestAllocator {
-    count: AtomicUsize,
-    bytes: AtomicUsize,
-    enabled: AtomicBool,
     system: System,
 }
 
 impl TestAllocator {
     pub const fn new() -> Self {
-        Self {
-            count: AtomicUsize::new(0),
-            bytes: AtomicUsize::new(0),
-            enabled: AtomicBool::new(true),
-            system: System,
-        }
+        Self { system: System }
     }
 
-    /// ENABLE/DISABLE TRACKING.
+    /// ENABLE/DISABLE TRACKING ON THE CURRENT THREAD.
     pub fn set_enabled(&self, enabled: bool) {
-        self.enabled.store(enabled, Ordering::Relaxed);
+        ENABLED.with(|e| e.set(enabled));
     }
 
-    /// RESET COUNTERS.
+    /// RESET THE CURRENT THREAD'S COUNTERS.
     pub fn reset(&self) {
-        self.count.store(0, Ordering::Relaxed);
-        self.bytes.store(0, Ordering::Relaxed);
+        COUNTERS.with(|c| c.set((0, 0)));
     }
 
-    /// RETURN CURRENT SNAPSHOT.
+    /// RETURN THE CURRENT THREAD'S SNAPSHOT.
     pub fn snapshot(&self) -> (usize, usize) {
-        (
-            self.count.load(Ordering::Acquire),
-            self.bytes.load(Ordering::Acquire),
-        )
+        COUNTERS.with(|c| c.get())
     }
 }
 
@@ -77,20 +79,28 @@ impl Default for TestAllocator {
 // SAFETY: TestAllocator wraps System allocator. System is safe for global use.
 unsafe impl GlobalAlloc for TestAllocator {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        if self.enabled.load(Ordering::Relaxed) {
-            self.count.fetch_add(1, Ordering::Release);
-            self.bytes.fetch_add(layout.size(), Ordering::Release);
-        }
+        ENABLED.with(|e| {
+            if e.get() {
+                COUNTERS.with(|c| {
+                    let (n, b) = c.get();
+                    c.set((n.saturating_add(1), b.saturating_add(layout.size())));
+                });
+            }
+        });
         self.system.alloc(layout)
     }
 
     unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
-        // DESIGN NOTE: IF set_enabled(false) BETWEEN alloc AND dealloc,
-        // BYTES COUNTER WILL NOT DECREMENT — PERMANENT DRIFT.
-        // CALLER MUST RESET AFTER DISABLE/REENABLE CYCLES.
-        if self.enabled.load(Ordering::Relaxed) {
-            self.bytes.fetch_sub(layout.size(), Ordering::Release);
-        }
+        // SATURATING SUB: A CROSS-THREAD FREE (ALLOCATED ON ANOTHER
+        // THREAD) MUST NOT UNDERFLOW THIS THREAD'S BYTE COUNTER.
+        ENABLED.with(|e| {
+            if e.get() {
+                COUNTERS.with(|c| {
+                    let (n, b) = c.get();
+                    c.set((n, b.saturating_sub(layout.size())));
+                });
+            }
+        });
         self.system.dealloc(ptr, layout)
     }
 }
@@ -113,8 +123,8 @@ pub fn set_global_allocator_ref(allocator: &'static TestAllocator) {
 ///
 /// ## IMPORTANT
 ///
-/// THIS FUNCTION IS **NOT** REENTRANT. IF `f` CALLS
-/// `execute_on_ferrite_core`, COUNTERS MAY CORRUPT.
+/// NESTING `execute_on_ferrite_core` INSIDE `f` IS DISCOURAGED —
+/// THE INNER WINDOW SHADOWS THE OUTER ONE ON THE SAME THREAD.
 ///
 /// FOR MULTITHREADED CODE USE SEPARATE PROCESS WITH ISOLATED ALLOCATOR.
 ///
