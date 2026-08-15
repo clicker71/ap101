@@ -195,6 +195,7 @@ All key numbers already exist in the Clarus benchmark suites
 |---|---|
 | hidden `String` clone in the auth lookup | borrow returned, zero allocations |
 | `write!`/`format!` per QIDO response | manual sink, zero allocations per response |
+| fuzzy patient-name search on a managed runtime: hidden allocations and GC pauses on the query hot path | Bitap (Shift-Or) one-edit match from stack-only masks, TestAllocator-gated zero heap; candidates narrowed by the n-gram `.idx` accelerator with zero-heap intersect |
 | ring counters wrapped → infinite loop at full buffer | boundary test drives the full buffer |
 | padding leaks extra bytes into the cache | `assert_no_padding!` pins the layout |
 | unknown behavior on a flipped bit | single-bit flips and 2–8-bit bursts detected (CRC-32) |
