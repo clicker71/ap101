@@ -1,7 +1,10 @@
-# AP-101B Ferrite Discipline
+# ap101: CI Discipline for High-Load Systems
 
-> **A compile-time and test-time SIHFT (Software-Implemented Hardware Fault Tolerance) framework for high-performance Rust.**
-> **An automated CI gate ensuring zero-heap allocation compliance, strict struct geometry, and software-level resilience against memory corruption.**
+> **The same architectural rigor that flew on the Space Shuttle — now an
+> automated gate in your repository.**
+> Zero-allocation compliance, strict struct geometry, cache-line discipline,
+> and software-level resilience against memory corruption (SIHFT) — enforced
+> at compile time and in CI.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE) [![CI](https://github.com/clicker71/ap101/actions/workflows/ci.yml/badge.svg)](https://github.com/clicker71/ap101/actions/workflows/ci.yml) [![Mission Status](https://img.shields.io/badge/AP--101-GO%20FOR%20LAUNCH-brightgreen)](https://github.com/clicker71/ap101) [![Boosty](https://img.shields.io/badge/Boosty-Support_Mission-orange)](https://boosty.to/clicker71/donate)
 
@@ -17,18 +20,17 @@ focused on arbitrary 256 KB memory limitations.
 
 `ap101` implements pragmatic **Software-Implemented Hardware Fault Tolerance
 (SIHFT)** concepts for production applications. It was forged as the core
-internal testing discipline for the **[Clarus PACS](https://github.com/clarus-pacs/clarus)**
-medical imaging server. DICOM ingestion dealing with gigabytes of multi-frame
-CT/MRI data cannot tolerate heap churn, fragmentation, or silent data
-corruption caused by unstable hardware.
+internal testing discipline for the **Clarus PACS** medical imaging server
+(repository link follows when the project goes public). DICOM ingestion
+dealing with gigabytes of multi-frame CT/MRI data cannot tolerate heap churn,
+fragmentation, or silent data corruption caused by unstable hardware.
 
 ### Proven Production Impact in Clarus
 
 - **Zero-Heap Reinforcement:** Slashed run-time allocations from **128 000 to
   exactly 0** per computed tomography (CT) study ingestion.
-- **COTS Hardware Resilience:** Prevents `OOM-KILL` failures and memory
-  corruption crashes on cheap ARM single-board computers and old, repurposed
-  x86 workstations deployed in local regional hospitals. The discipline scales
+- **Target hardware profile:** designed for cheap ARM single-board computers
+  and repurposed x86 workstations in regional clinics. The discipline scales
   in both directions: keeps budget hardware alive, keeps big hardware fast.
 
 ---
@@ -51,7 +53,7 @@ invariants do not degrade during rapid production refactoring.
 
 ## The Three Pillars of SIHFT Enforcement
 
-The framework provides three distinct, high-utility tools for your test suite:
+The framework provides four distinct, high-utility tools for your test suite:
 
 1. **Zero-Heap Enforcer (`TestAllocator`):** A global allocator interceptor.
    If a hot-path parsing function leaks a hidden allocation (`String`, `Vec`,
@@ -65,6 +67,11 @@ The framework provides three distinct, high-utility tools for your test suite:
    designed to simulate physical single-event upsets (SEUs) and transient
    bit-flips. Validates how your software detects, flags, and gracefully
    handles physical memory corruption.
+
+4. **Cache-Line Audit (`cache_line_fields!` / `FieldSpan`):** Compile-time
+   per-field cache-line spans via `offset_of!`. Flags fields straddling a
+   64-byte line boundary (two line fills per access) and groups fields that
+   false-share one line across threads.
 
 ---
 
@@ -106,6 +113,106 @@ Expected output:
 
 **[DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)** — full guide: writing tests, CI setup,
 understanding failures, common pitfalls, reference projects.
+
+---
+
+## What ap101 Already Found in Production Code
+
+Every claim below is a real finding from the Clarus DICOMweb server, caught by
+the gates before it reached a user. Each entry carries a file/line or commit
+reference inside the Clarus repository; public links are added when it opens.
+
+### 1. The Cache-Line Surgeon (shipped same-day)
+
+The brand-new cache-line gate caught a real defect on its first run:
+`InstanceRecord.sha256`, a 32-byte hash, straddled a 64-byte cache-line
+boundary — every read touched two lines instead of one.
+
+- Fix: `#[repr(C)]` with the two 32-byte hashes first (`blake3` at 0..32,
+  `sha256` at 32..64). Fields are accessed by name and the manifest is
+  CBOR-serialized, so the reorder is wire-safe.
+- The field is a legacy-tier address scheduled for removal; the fix is cheap
+  and temporary, and the gate will re-verify the layout after the field goes.
+- Measured effect on the development bench: none. The dev machine is
+  disk-bound; this defect class is only visible on memory-bound target
+  hardware. The gate caught what the benchmarks could not measure.
+
+### 2. The Tool That Was Audited by the Product
+
+The zero-alloc gates themselves run under real CI load. They caught a flake in
+their own allocator: foreign harness threads were polluting the global
+allocation counters, causing rare false failures. The counters moved to
+per-thread storage — a measuring thread now sees only its own allocations.
+The tool that audits the product was audited by the product.
+
+### 3. The Honest Negative
+
+One streaming path (multipart body buffering) legitimately allocates — copying
+500 MB parts would be worse. The test does not pretend otherwise: it declares
+the non-zero path with file/line and verifies what is actually guaranteed
+(correctness across torn read boundaries) instead of painting green over the
+exception.
+
+### The Findings Journal
+
+| Finding | What the gate did |
+|---|---|
+| CBOR codec designed zero-alloc | confirmed the design contract, no retrofit |
+| hidden `String` clone in the auth hot-path lookup | found, fixed to a borrow |
+| journal ring counters wrapped modulo → giant `len()` → infinite loop | caught at the full-buffer boundary |
+| `write!`/`format!` on the QIDO response | replaced with a manual `&mut [u8]` sink: −1 allocation per response |
+| bitap fuzzymatch | masks on the stack, zero heap in the search path |
+| HTTP request line, 15 headers, route match, chunked body | zero allocations per request; header parse ≈309 ns |
+| streaming multipart buffer | honest non-zero path, documented with file:line |
+
+### Numbers (existing, not promises)
+
+- `parse_bench`: ~309 ns for a ~200-byte request head (gate: <5 µs).
+- QIDO: −1 allocation per response → ≈8.6M heap allocations/day avoided —
+  **estimate at 100 QIDO/s** (100 × 86 400), computed, not measured.
+
+### Benchmarks
+
+All key numbers already exist in the Clarus benchmark suites
+(cas / qido / stow / wado / index / concurrency). The roadmap item is to
+**export** them here with links to runs — not to generate new ones.
+
+### With vs Without
+
+| Without ap101 | With ap101 |
+|---|---|
+| hidden `String` clone in the auth lookup | borrow returned, zero allocations |
+| `write!`/`format!` per QIDO response | manual sink, zero allocations per response |
+| ring counters wrapped → infinite loop at full buffer | boundary test drives the full buffer |
+| padding leaks extra bytes into the cache | `assert_no_padding!` pins the layout |
+| unknown behavior on a flipped bit | single-bit flips and 2–8-bit bursts detected (CRC-32) |
+
+### 30-Second Example
+
+```rust
+use ferrite_core::assert_no_padding;
+use ferrite_testkit::heap::TestAllocator;
+
+#[repr(C)]
+struct HotRecord {
+    hash: [u8; 32],
+    size: u64,
+}
+
+// Compile-time: no hidden padding in the hot record.
+assert_no_padding!(HotRecord, hash: [u8; 32], size: u64);
+
+#[global_allocator]
+static ALLOC: TestAllocator = TestAllocator::new();
+
+#[test]
+fn hot_record_path_is_zero_alloc() {
+    let before = ALLOC.snapshot();
+    let _ = core::mem::size_of::<HotRecord>(); // your hot path here
+    let after = ALLOC.snapshot();
+    assert_eq!(before, after, "hot path allocated");
+}
+```
 
 ---
 
@@ -212,6 +319,9 @@ the aerospace industry learned the hard way in 1991.
   Cosmic ray injection for SEU testing.
 - **Structural audit** — compile-time geometry checks (`size_of`, `align_of`,
   zero hidden padding) via `assert_no_padding!` macro and runtime `GeometryReport`.
+- **Cache-line audit** — `cache_line_fields!` macro + `FieldSpan` spans
+  (`crosses_line()`, `shares_line_with()`), computed at compile time via
+  `offset_of!`. Detects cross-cache-line field splits and false-sharing groups.
 - **Checksums** — `Checksum` trait with `Crc16`, `Crc32`, `XorFold` implementations.
   Stack-only. Zero allocations.
 - **IBM PASS CRT telemetry** — `IbmCrt` decorator with historical `AP101B-CORE-` message IDs.
@@ -379,7 +489,7 @@ constraints, read **[DECISIONS.md](./DECISIONS.md)**.
 ## ROADMAP
 
 ```
-- [ ] V0.1.1  CRITERION BENCHMARKS — CLARUS BEFORE/AFTER (NS/OP, LATENCY TAILS)
+- [ ] V0.1.1  EXPORT CLARUS BENCHMARKS INTO README WITH LINKS TO RUNS (NS/OP, LATENCY TAILS)
 - [x] V0.1.1  CACHE-LINE ANALYSIS IN GEOMETRYREPORT (FALSE SHARING DETECTION)
 - [ ] V0.2.0  #[DERIVE(FERRITEDISCIPLINE)] — ONE ANNOTATION: GEOMETRY + PADDING + CRC
 - [ ] V0.2.0  HFT/GAMEDEV FEATURE PROFILES (FEATURES = ["HFT"])
