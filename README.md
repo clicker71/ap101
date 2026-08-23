@@ -35,15 +35,18 @@ full methodology, per-run tables and limitations:
 | Phase | Clarus+bridge | Orthanc 1.12.11 | Ratio |
 |-------|---------------|-----------------|-------|
 | C-MOVE read (like for like) | 34.9 s (29.7 MB/s) | 103.3 s (10.0 MB/s) | 3.0x |
-| Ingest end to end | 58.8 s (17.6 MB/s) | 76.9 s (13.5 MB/s) | 1.3x |
-| C-STORE phase (accept only) | 23.3 s (44.4 MB/s) | 76.9 s (13.5 MB/s) | 3.3x |
+| Ingest end to end (HOP1+HOP2) | 58.8 s (17.6 MB/s) | 76.9 s (13.5 MB/s) | 1.3x |
+|   HOP1: C-STORE into outbox (accept only) | 23.3 s (44.4 MB/s) | 76.9 s (13.5 MB/s) | 3.3x |
+|   HOP2: outbox drain -> Clarus STOW | 36.5 s (28.4 MB/s) | - (single hop) | - |
 
 Conditions: same VMware VM (3 vCPU, 32 GB RAM, HDD-backed virtual disks),
 loopback, 1035.1 MB corpus (1063 instances, 3 studies), documented Defender
 exclusions. n = 7 clean runs per condition (Clarus+bridge), Orthanc n = 9/10.
-Orthanc C-STORE is synchronous (its C-STORE phase is its full ingest); the
-bridge's ingest is C-STORE acceptance + outbox drain - the rows exist so
-nobody can sell the 3.3x acceptance rate as a 3.3x ingest. Without the
+Hop model: Orthanc does everything in ONE synchronous hop (its C-STORE
+phase is its full ingest). The bridge is TWO hops: HOP1 = asynchronous
+DIMSE acceptance into the outbox, HOP2 = drain into Clarus; the honest
+like-for-like number is HOP1+HOP2. The HOP1 row exists so nobody can sell
+the 3.3x acceptance rate as a 3.3x ingest. Without the
 exclusions Defender eats 54% of ingest and Clarus+bridge is ~17% slower
 than Orthanc - the exclusions are operational, not cosmetic.
 
