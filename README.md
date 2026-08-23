@@ -34,15 +34,18 @@ full methodology, per-run tables and limitations:
 
 | Phase | Clarus+bridge | Orthanc 1.12.11 | Ratio |
 |-------|---------------|-----------------|-------|
-| C-STORE phase | 23.3 s (44.4 MB/s) | 77.5 s (13.4 MB/s) | 3.3x |
-| Ingest end to end | 58.8 s (17.6 MB/s) | 77.5 s (13.4 MB/s) | 1.3x |
-| C-MOVE read | 34.9 s (29.7 MB/s) | 103.0 s (10.0 MB/s) | 3.0x |
+| C-MOVE read (like for like) | 34.9 s (29.7 MB/s) | 103.3 s (10.0 MB/s) | 3.0x |
+| Ingest end to end | 58.8 s (17.6 MB/s) | 76.9 s (13.5 MB/s) | 1.3x |
+| C-STORE phase (accept only) | 23.3 s (44.4 MB/s) | 76.9 s (13.5 MB/s) | 3.3x |
 
 Conditions: same VMware VM (3 vCPU, 32 GB RAM, HDD-backed virtual disks),
 loopback, 1035.1 MB corpus (1063 instances, 3 studies), documented Defender
-exclusions. Orthanc C-STORE is synchronous (its C-STORE phase is its full
-ingest); the bridge's ingest is C-STORE acceptance + outbox drain - the two
-rows exist so nobody can sell the 3.3x acceptance rate as a 3.3x ingest.
+exclusions. n = 7 clean runs per condition (Clarus+bridge), Orthanc n = 9/10.
+Orthanc C-STORE is synchronous (its C-STORE phase is its full ingest); the
+bridge's ingest is C-STORE acceptance + outbox drain - the rows exist so
+nobody can sell the 3.3x acceptance rate as a 3.3x ingest. Without the
+exclusions Defender eats 54% of ingest and Clarus+bridge is ~17% slower
+than Orthanc - the exclusions are operational, not cosmetic.
 
 ### Proven Production Impact in Clarus
 
