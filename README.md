@@ -25,6 +25,25 @@ internal testing discipline for the **Clarus PACS** medical imaging server
 dealing with gigabytes of multi-frame CT/MRI data cannot tolerate heap churn,
 fragmentation, or silent data corruption caused by unstable hardware.
 
+### Measured Head-to-Head: Clarus vs Orthanc (DIMSE, 2026-08-23)
+
+Medians of 7 clean runs, produced by the public harness
+[ab_test.py](https://github.com/clicker71/clarus-pacs/blob/main/tools/ab_test.py);
+full methodology, per-run tables and limitations:
+[benchmark.md](https://github.com/clicker71/clarus-pacs/blob/main/benchmark.md).
+
+| Phase | Clarus+bridge | Orthanc 1.12.11 | Ratio |
+|-------|---------------|-----------------|-------|
+| C-STORE phase | 23.3 s (44.4 MB/s) | 77.5 s (13.4 MB/s) | 3.3x |
+| Ingest end to end | 58.8 s (17.6 MB/s) | 77.5 s (13.4 MB/s) | 1.3x |
+| C-MOVE read | 34.9 s (29.7 MB/s) | 103.0 s (10.0 MB/s) | 3.0x |
+
+Conditions: same VMware VM (3 vCPU, 32 GB RAM, HDD-backed virtual disks),
+loopback, 1035.1 MB corpus (1063 instances, 3 studies), documented Defender
+exclusions. Orthanc C-STORE is synchronous (its C-STORE phase is its full
+ingest); the bridge's ingest is C-STORE acceptance + outbox drain - the two
+rows exist so nobody can sell the 3.3x acceptance rate as a 3.3x ingest.
+
 ### Proven Production Impact in Clarus
 
 - **Zero-Heap Reinforcement:** Slashed run-time allocations from **128 000 to
