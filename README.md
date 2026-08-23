@@ -36,8 +36,8 @@ full methodology, per-run tables and limitations:
 |-------|---------------|-----------------|-------|
 | C-MOVE read (like for like) | 34.9 s (29.7 MB/s) | 103.3 s (10.0 MB/s) | 3.0x |
 | Ingest end to end (HOP1+HOP2) | 58.8 s (17.6 MB/s) | 76.9 s (13.5 MB/s) | 1.3x |
-|   HOP1: C-STORE into outbox (accept only) | 23.3 s (44.4 MB/s) | 76.9 s (13.5 MB/s) | 3.3x |
-|   HOP2: outbox drain -> Clarus STOW | 36.5 s (28.4 MB/s) | - (single hop) | - |
+| +- HOP1: C-STORE into outbox (accept only) | 23.3 s (44.4 MB/s) | 76.9 s (13.5 MB/s) | 3.3x |
+| +- HOP2: outbox drain -> Clarus STOW | 36.5 s (28.4 MB/s) | - (single hop) | - |
 
 Conditions: same VMware VM (3 vCPU, 32 GB RAM, HDD-backed virtual disks),
 loopback, 1035.1 MB corpus (1063 instances, 3 studies), documented Defender
