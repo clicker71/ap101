@@ -62,24 +62,21 @@ the header is evicted. Recorded as a candidate stage-2 layout anchor:
 moving the four hot scalars before the four Vec headers keeps every
 Vec header inside a single cache line.
 
-## 6. Stage 2 (gated, NOT yet started)
+## 6. Stage 2 outcome (measured 2026-08-27): NOT ATTEMPTED
 
-Profile first, code second. Anchors (upstream paths, 1.0.0):
+Rule: profile first, code second; if the expected win is < 1.5x, no PR.
 
-1. src/bitstream.rs read_golomb - u64 buffer + leading_zeros/trailing_zeros
-   for the unary quotient; refill only on exhaustion.
-2. src/bitstream.rs fill - 8-byte bulk refill, 0xFF-stuffing masked AFTER
-   the load, not per byte.
-3. src/decode.rs decode_scan - remove per-pixel border branches via
-   w+2 sentinel rows or first/last specialization; ra/rb/rc/rd semantics
-   preserved exactly.
-4. src/decode.rs - remove the duplicate row-write loop (second
-   `for xi in 0..w`), keep one write.
-5. src/context.rs quantize_gradient - branchless lookup table for the
-   9-branch threshold chain.
+Profile (instrumented workdir copy, RDTSC counters, 5 largest corpus
+files x 4 repeats, medians): read_golomb 38.2%, quantize_gradient 18.9%,
+fill 14.5% (inside read_golomb), border branches 4.5%, duplicate row
+write 0.17%, untouched pixel body (predictor + clamp + context update +
+writes) 38.2%.
 
-Rules: run-mode untouched (intentionally disabled, DICOS compatibility);
-codec-parity must stay 100% after EACH anchor; bench min/med/max over
->= 5 runs; if the expected win is < 1.5x the PR is NOT attempted and
-the report says so. No fork. Upstream PR contains code + tests only;
-ap101 gates stay in ap101.
+Measured experiment (anchors 1+2 only, private workdir): upstream tests
+61/61, codec-parity 424/424, bench n=50 median 2338 -> 2153 ms = 1.086x.
+
+Projection for all five anchors, optimistic ceilings: ~1.26x, at most
+~1.3x - the 38% body caps everything below 1.5x.
+
+VERDICT: profile showed < 1.5x - NOT DOING IT. No PR, no fork; the
+codec-parity harness remains ap101's own verification tool.
