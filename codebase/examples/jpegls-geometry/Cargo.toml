@@ -1,0 +1,40 @@
+#--------------------------------------------------------------------
+# PACKAGE:      jpegls-geometry
+# PURPOSE:      AP-101 geometry + heap-discipline audit of the UPSTREAM
+#               pure_jpegls 1.0.0 decoder (crates.io, MIT OR Apache-2.0,
+#               (c) JP Fielding). The sources under src/vendor/ are a
+#               VERBATIM COPY for compile-time audit only - NOT a fork.
+#
+#               Gates here answer two questions BEFORE any optimization
+#               is attempted:
+#                 1. GEOMETRY: BitReader (touched on every bit), Decoder,
+#                    ContextModel - cache-line spans, no padding bloat.
+#                    Tool: cache_line_fields! + assert_no_padding!.
+#                 2. HEAP:   the decode hot path allocates EXACTLY the
+#                    declared once-per-image buffers ("the honest
+#                    non-zero path") and NOTHING per pixel.
+#                    Tool: TestAllocator windows.
+#
+#               NOTE: NO FerriteCell / CRC / SEU machinery is used.
+#               The codec-parity byte-diff (sibling crate jpegls-parity)
+#               is the stronger correctness check by design.
+# AUTHOR:       Daniil Solgalov <clicker71@github>
+# DATE:         2026-08-27
+# MACHINE:      IBM AP-101B (HONORARY)
+# CONSTRAINTS:  256 KB USABLE CORE. NO HEAP WITHOUT CAUSE.
+#--------------------------------------------------------------------
+
+[package]
+name = "jpegls-geometry"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "AP-101 geometry and heap audit of upstream pure_jpegls 1.0.0 (vendored copy, not a fork)"
+
+[dependencies]
+# Upstream pure_jpegls declares thiserror = "2" (see vendor_upstream_cargo_toml.orig).
+thiserror = "2"
+
+[dev-dependencies]
+ferrite-core = { path = "../../ferrite-core" }
+ferrite-testkit = { path = "../../ferrite-testkit" }

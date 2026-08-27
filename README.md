@@ -254,6 +254,51 @@ fn hot_record_path_is_zero_alloc() {
 
 ---
 
+## Codec Parity: JPEG-LS Decode Byte-Diff Audit
+
+> BADGE LINE: codec-parity 424/424 BYTE-IDENTICAL - JPEG-LS
+> (1.2.840.10008.1.2.80), upstream pure_jpegls 1.0.0 (2026-08-27).
+> Full report: CODEC-PARITY-REPORT.md
+
+The codec-parity harness is the **strongest check available** for codec
+work: run a REFERENCE command and a TESTED command over a corpus of
+real DICOM/JPEG-LS files, byte-compare every decoded pixel buffer, and
+fail on a single differing byte. No CRC, no SEU machinery - a raw
+byte-diff cannot be fooled.
+
+### What it found in upstream pure_jpegls 1.0.0 (2026-08-27)
+
+| Gate | Verdict | Detail |
+|------|---------|--------|
+| corpus parity | 424/424 byte-identical | field DICOM/JPEG-LS corpus, 776x776x16-bit, 215 MB |
+| `BitReader` geometry | fits one 64B cache line | touched on every bit read, zero split fields |
+| `Decoder` geometry | fits one 64B cache line | marker/byte walker |
+| `ContextModel` geometry | 256 B, no padding | FINDING: `c` (bias correction, read every pixel) crosses line 0..1 |
+| full-decode heap | exactly 7 allocations | pixels + A/B/C/N context + 2 row buffers, nothing else |
+| scan-loop heap | exactly 2 allocations | `curr_line`/`prev_line` only; freed before return; NOTHING per pixel |
+
+### Run it
+
+```bash
+# driver: one DICOM file -> header line + raw u16 LE pixels on stdout
+cargo run --release -p jpegls-driver -- file.dcm > out.bin
+
+# parity: <dir> <ref-cmd> <test-cmd>, byte-compares every file
+cargo run --release -p jpegls-parity -- \
+    codec-parity /path/to/corpus \
+    /path/to/reference-driver /path/to/tested-driver
+
+# audit gates: geometry + heap discipline over the vendored sources
+cargo test -p jpegls-geometry
+```
+
+Crates: `examples/jpegls-driver` (byte-exact decoder driver),
+`examples/jpegls-parity` (harness), `examples/jpegls-geometry`
+(vendored pure_jpegls 1.0.0 copy + audit gates; provenance in its
+`VENDOR.md` - a copy for audit, NOT a fork).
+
+---
+
 ## The Illusion of High-Level Code
 
 Modern software engineering has grown lazy. High-level languages and frameworks
@@ -566,6 +611,13 @@ ap101/
 │   │   ├── ap101b-core/        # AP-101B: Ferrite core memory
 │   │   │   ├── src/lib.rs      # NavigationState (B-model)
 │   │   │   └── tests/discipline.rs
+│   │   ├── jpegls-driver/      # Codec-parity: DICOM/JPEG-LS -> raw pixels
+│   │   │   └── src/main.rs     # byte-exact stdout driver (upstream 1.0.0)
+│   │   ├── jpegls-parity/      # Codec-parity: byte-diff harness
+│   │   │   └── src/main.rs     # ref vs tested, per-file byte compare
+│   │   ├── jpegls-geometry/    # Vendored pure_jpegls 1.0.0 + audit gates
+│   │   │   ├── src/vendor/     # byte-identical upstream copy (VENDOR.md)
+│   │   │   └── src/gates.rs    # G1 geometry / G2-G3 heap discipline
 │   │   ├── ap101s-cmos/        # AP-101S: CMOS SRAM + DRAM/ECC
 │   │   │   ├── src/lib.rs      # NavigationState (S-model)
 │   │   │   └── tests/discipline.rs

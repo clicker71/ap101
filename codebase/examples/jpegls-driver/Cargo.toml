@@ -1,0 +1,21 @@
+#--------------------------------------------------------------------
+# PACKAGE:      jpegls-driver
+# PURPOSE:      AP-101 codec-parity driver: decode one DICOM/JPEG-LS file
+#               to raw pixels on stdout (deterministic byte output).
+#               REFERENCE build links crates.io pure_jpegls 1.0.0.
+# AUTHOR:       Daniil Solgalov <clicker71@github>
+# DATE:         2026-08-27
+# MACHINE:      IBM AP-101B (HONORARY)
+# CONSTRAINTS:  Output is BYTE-EXACT and machine-independent
+#               (little-endian u16 pixels, fixed header line).
+#--------------------------------------------------------------------
+
+[package]
+name = "jpegls-driver"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "AP-101 codec-parity driver: DICOM/JPEG-LS file to raw pixels (stdout)"
+
+[dependencies]
+pure_jpegls = "1.0.0"

@@ -15,6 +15,9 @@ members = [
     "codebase/examples/ap101b-core",
     "codebase/examples/ap101s-cmos",
     "codebase/examples/clarus-audit",
+    "codebase/examples/jpegls-driver",
+    "codebase/examples/jpegls-parity",
+    "codebase/examples/jpegls-geometry",
 ]
 resolver = "2"
 

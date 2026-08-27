@@ -1,0 +1,22 @@
+#--------------------------------------------------------------------
+# PACKAGE:      jpegls-parity
+# PURPOSE:      AP-101 codec-parity harness: run a REFERENCE command and
+#               a TESTED command over a corpus of files, byte-compare
+#               their stdout, print an audit table, fail on any diff.
+#               THE parity byte-diff IS the strongest check available:
+#               no CRC/SEU tricks needed (deliberately not used).
+# AUTHOR:       Daniil Solgalov <clicker71@github>
+# DATE:         2026-08-27
+# MACHINE:      IBM AP-101B (HONORARY)
+# CONSTRAINTS:  ZERO dependencies beyond the std library.
+#               Deterministic output; machine-independent verdicts.
+#--------------------------------------------------------------------
+
+[package]
+name = "jpegls-parity"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "AP-101 codec-parity harness: byte-exact decode comparison over a corpus"
+
+[dependencies]
