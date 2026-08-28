@@ -212,6 +212,12 @@ exception.
 | bitap fuzzymatch | masks on the stack, zero heap in the search path |
 | HTTP request line, 15 headers, route match, chunked body | zero allocations per request; header parse ≈309 ns |
 | streaming multipart buffer | honest non-zero path, documented with file:line |
+| `decide_insert_result` Inserted arm (W-AP101) | honest 5-alloc budget gate; the "alloc-free" claim was false, no false green |
+| access journal `emit` (W-AP101) | minimal line = exactly 256B → 256-byte buffer reallocated on EVERY event; buffer now 512, geometry pinned |
+| `InstanceRecord` transfer_syntax straddle, `repr(C)` (W-AP101) | BUDGETED pin at offset 56; reorder off-limits (positional CBOR decode) |
+| `InstanceModel` / `SeriesModel` cacheline minima (W-AP101) | brute-forced over all permutations: minima are 1 / 2 straddles; pinned as BUDGETED |
+| stale ferrite pin `rev=292e82ee` (W-AP101) | the pinned rev predated `cache_line_fields!` by two commits; corrected to `17a24a8f` in all 4 manifests |
+| silent gate breakage in an excluded crate (W-AP101) | `clarus-testing` gates never ran under `cargo test --all`; they now run explicitly and were fixed |
 
 ### Numbers (existing, not promises)
 
