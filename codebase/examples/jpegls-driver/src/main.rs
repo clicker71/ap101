@@ -292,8 +292,7 @@ fn decode_file(path: &str) -> Result<(), String> {
     )
     .map_err(|e| format!("stdout: {e}"))?;
 
-    for comp in 0..spp {
-        let frag = &fragments[comp];
+    for (comp, frag) in fragments.iter().take(spp).enumerate() {
         let (pixels, w, h) = jpegls::decode(frag, meta.columns, meta.rows)
             .map_err(|e| format!("decode component {comp}: {e}"))?;
         if w != meta.columns || h != meta.rows {
