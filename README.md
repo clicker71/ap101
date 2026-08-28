@@ -66,6 +66,17 @@ than Orthanc - the exclusions are operational, not cosmetic.
 - **Numbers, not adjectives:** the ingestion parse path benchmarks at
   **~309 ns** against a 5 µs CI budget (full numbers and findings journal
   below).
+- **Per-request hot-path hygiene (W-HP1, 2026-08):** four new 0-alloc gates —
+  request-head read+parse (an 8 KiB copy per request removed), WADO
+  single-object response head built into the reused connection buffer (one
+  fresh Vec per response removed), level-gated logging (a disabled DEBUG
+  line now costs zero formatting and zero allocation), and CAS two-level
+  paths rendered into a stack buffer (one allocation per WADO open removed).
+- **The gate cascade caught a logic bug, not an allocation:** the day-list
+  cache introduced in the same sprint made the first row of a brand-new day
+  invisible until rollover (an update resolved as a fresh insert); the smoke
+  suite caught it, and the fix inserts the new day key under the same mutex.
+  The discipline keeps paying for itself.
 - **Target hardware profile:** designed for cheap ARM single-board computers
   and repurposed x86 workstations in regional clinics. The discipline scales
   in both directions: keeps budget hardware alive, keeps big hardware fast.
