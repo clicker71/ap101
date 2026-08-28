@@ -92,8 +92,8 @@ fn print_header() {
     println!("AP-101 CODEC-PARITY  |  JPEG-LS DECODE BYTE-DIFF AUDIT");
     println!("{RULE}");
     println!(
-        "{:<34} {:>10} {:>8} {:>8} {:>8}  {}",
-        "FILE", "DIMS", "REF-us", "TEST-us", "MATCH", "NOTE"
+        "{:<34} {:>10} {:>8} {:>8} {:>8}  NOTE",
+        "FILE", "DIMS", "REF-us", "TEST-us", "MATCH"
     );
     println!("{RULE}");
 }
