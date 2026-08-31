@@ -269,6 +269,32 @@ fn hot_record_path_is_zero_alloc() {
 }
 ```
 
+## Beyond Medical Imaging: Same Discipline, Other Domains
+
+ap101 validates a medical image server, but the gates themselves are
+domain-agnostic. The table below translates EXISTING Clarus artifacts
+into the vocabulary of adjacent low-latency domains. It is an analogy,
+not a benchmark: every number was measured on Clarus code paths, not
+on trading feeds or game loops.
+
+| Clarus artifact (measured, file/line inside the Clarus repo) | The same gate discipline in your domain |
+|---|---|
+| HTTP request head: 15 headers, route match, chunked framing - zero allocations per request, ~309 ns parse (gate budget 5 us) | Binary feed parsing (FIX/SBE/ITCH-style): the build fails when a header or route parse grows an unbudgeted allocation mid-session |
+| `clarus-audit`: `ChunkRecord` 40 B, `DicomElement` 12 B, zero hidden padding via `assert_no_padding!` | Dense component and record layouts (ECS-style SoA, order-book levels): compile-time pinning so each cache line carries more payload |
+| `cache_line_fields!` caught `InstanceRecord.sha256` straddling a 64-byte line (see "The Cache-Line Surgeon") | False-sharing and straddle detection for structs touched by parallel threads (feed reader vs risk/consumer) |
+| bitap (Shift-Or) fuzzy name search: stack-only masks, TestAllocator-gated zero heap | Ticker allow-list filtering and fuzzy symbol lookups with zero heap churn in the matching path |
+
+Honesty clause, stated once:
+
+- The gates enforce what the tests declare. Budgeted paths are
+  budgeted: measured Clarus budgets are 1 allocation for a file open,
+  3 for a path join, exactly 5 on the insert path - each locked by a
+  TestAllocator gate. The multipart buffer is a declared non-zero path
+  with file/line (see "The Honest Negative"). ap101 never repaints a
+  real allocation as zero.
+- File references inside the Clarus repository become clickable when
+  Clarus PACS opens publicly.
+
 ---
 
 ## Codec Parity: JPEG-LS Decode Byte-Diff Audit
@@ -592,7 +618,7 @@ constraints, read **[DECISIONS.md](./DECISIONS.md)**.
 - [ ] V0.1.1  EXPORT CLARUS BENCHMARKS INTO README WITH LINKS TO RUNS (NS/OP, LATENCY TAILS)
 - [x] V0.1.1  CACHE-LINE ANALYSIS IN GEOMETRYREPORT (FALSE SHARING DETECTION)
 - [ ] V0.2.0  #[DERIVE(FERRITEDISCIPLINE)] — ONE ANNOTATION: GEOMETRY + PADDING + CRC
-- [ ] V0.2.0  HFT/GAMEDEV FEATURE PROFILES (FEATURES = ["HFT"])
+- [ ] V0.2.0  FEATURE PROFILES FOR THE FIRST NON-MEDICAL ADOPTER (REAL CODE DRIVES THE PROFILE - NO SYNTHETIC EXAMPLES)
 - [ ] V0.2.0  CARGO-AP101 CI PLUGIN — FAILS BUILD ON STRING IN HOT FUNCTION
 - [ ] V0.2.0  SPATIAL BURST SEU (2-4 ADJACENT CELLS, S-MODEL)
 - [ ] V0.2.0  ASYNC RUNTIME ISOLATION — ALLOC MICROSCOPE (TOKIO-AWARE)
