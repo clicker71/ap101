@@ -20,8 +20,9 @@ focused on arbitrary 256 KB memory limitations.
 
 `ap101` implements pragmatic **Software-Implemented Hardware Fault Tolerance
 (SIHFT)** concepts for production applications. It was forged as the core
-internal testing discipline for the **Clarus PACS** medical imaging server
-(repository link follows when the project goes public). DICOM ingestion
+internal testing discipline for the **[Clarus PACS](https://github.com/clicker71/clarus-pacs)**
+medical imaging server (code will be published there; the repository is
+a stub until then). DICOM ingestion
 dealing with gigabytes of multi-frame CT/MRI data cannot tolerate heap churn,
 fragmentation, or silent data corruption caused by unstable hardware.
 
@@ -168,7 +169,8 @@ understanding failures, common pitfalls, reference projects.
 
 Every claim below is a real finding from the Clarus DICOMweb server, caught by
 the gates before it reached a user. Each entry carries a file/line or commit
-reference inside the Clarus repository; public links are added when it opens.
+reference inside the Clarus repository; public links go live when the code
+lands at [clarus-pacs](https://github.com/clicker71/clarus-pacs).
 
 ### 1. The Cache-Line Surgeon (shipped same-day)
 
@@ -292,8 +294,8 @@ Honesty clause, stated once:
   TestAllocator gate. The multipart buffer is a declared non-zero path
   with file/line (see "The Honest Negative"). ap101 never repaints a
   real allocation as zero.
-- File references inside the Clarus repository become clickable when
-  Clarus PACS opens publicly.
+- File references become clickable when the code lands at
+  [clarus-pacs](https://github.com/clicker71/clarus-pacs).
 
 ---
 
