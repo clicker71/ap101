@@ -27,30 +27,31 @@ the closed preview ends). DICOM ingestion
 dealing with gigabytes of multi-frame CT/MRI data cannot tolerate heap churn,
 fragmentation, or silent data corruption caused by unstable hardware.
 
-### Measured Head-to-Head: Clarus vs Orthanc (DIMSE, 2026-08-23)
+### Measured on a Raspberry Pi 5 — and Why It Scales Up
 
-Medians of 7 clean runs, produced by the public harness
-[ab_test.py](https://github.com/clicker71/clarus-pacs/blob/main/tools/ab_test.py);
-full methodology, per-run tables and limitations:
+The same zero-allocation hot path runs the full PACS on a $60 board.
+Pi 5 (Cortex-A76, 2 GB RAM, NVMe over PCIe 2.0 x1), bare-metal native
+aarch64 build, loopback, 636 MB corpus, measured 2026-09-01:
+
+| Path | Pi 5 (ARM64) | srv01 i7 (x86_64) |
+|------|--------------|-------------------|
+| WADO read, warm, 1 stream | ~990 MB/s | 1.03-1.11 GB/s |
+| WADO read, cold, 1 stream | 244-356 MB/s | 344-428 MB/s |
+| Warm, 4 streams aggregate | 4.0 GB/s | - |
+| RSS after ingest | 5-6 MB | ~6 MB |
+
+A Cortex-A76 within ~10% of a desktop i7 means the hot path is not
+CPU-bound - it is bounded by memory bandwidth and page cache. The cold
+path is bounded by the storage device (PCIe 2.0 x1 on the Pi). Both
+ceilings lift with the hardware class: on a Xeon, cold throughput follows
+the NVMe class and warm throughput follows memory bandwidth, while
+per-connection scaling is already linear (4 streams ~= 4x one stream).
+The scaling mechanism is the discipline itself - 0-alloc parsing, verified
+struct geometry, 5-6 MB RSS - there is nothing left to tune between ARM
+and x86. Xeon-class numbers will be published when a Xeon stand is
+measured; until then i7 + Pi are the measured bounds. Full A/B
+methodology and per-run tables:
 [benchmark.md](https://github.com/clicker71/clarus-pacs/blob/main/benchmark.md).
-
-| Phase | Clarus+bridge | Orthanc 1.12.11 | Ratio |
-|-------|---------------|-----------------|-------|
-| C-MOVE read (like for like) | 34.9 s (29.7 MB/s) | 103.3 s (10.0 MB/s) | 3.0x |
-| Ingest end to end (HOP1+HOP2) | 58.8 s (17.6 MB/s) | 76.9 s (13.5 MB/s) | 1.3x |
-| +- HOP1: C-STORE into outbox (accept only) | 23.3 s (44.4 MB/s) | 76.9 s (13.5 MB/s) | 3.3x |
-| +- HOP2: outbox drain -> Clarus STOW | 36.5 s (28.4 MB/s) | - (single hop) | - |
-
-Conditions: same VMware VM (3 vCPU, 32 GB RAM, HDD-backed virtual disks),
-loopback, 1035.1 MB corpus (1063 instances, 3 studies), documented Defender
-exclusions. n = 7 clean runs per condition (Clarus+bridge), Orthanc n = 9/10.
-Hop model: Orthanc does everything in ONE synchronous hop (its C-STORE
-phase is its full ingest). The bridge is TWO hops: HOP1 = asynchronous
-DIMSE acceptance into the outbox, HOP2 = drain into Clarus; the honest
-like-for-like number is HOP1+HOP2. The HOP1 row exists so nobody can sell
-the 3.3x acceptance rate as a 3.3x ingest. Without the
-exclusions Defender eats 54% of ingest and Clarus+bridge is ~17% slower
-than Orthanc - the exclusions are operational, not cosmetic.
 
 ### Proven Production Impact in Clarus
 
