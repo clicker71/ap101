@@ -80,6 +80,16 @@ methodology and per-run tables:
   invisible until rollover (an update resolved as a fresh insert); the smoke
   suite caught it, and the fix inserts the new day key under the same mutex.
   The discipline keeps paying for itself.
+- **Cold-tier migration streams, not slurps:** the hot-to-cold copy used to
+  `std::fs::read` a whole instance into a `Vec`; it now streams through one
+  fixed 64 KiB stack buffer with a `u64` counter, and the whole-file read is
+  confined behind `#[cfg(feature = "s3")]` so the slow path cannot drift back
+  into the cold path.
+- **The invariant test caught its own first draft:** the mandatory
+  mid-patient-abort test for patient-atomic cold migration failed on the
+  author's first version - a missing hot file was treated as "skip", which
+  would have completed a patient with one unreadable blob. The code was
+  fixed, not the assertion.
 - **Target hardware profile:** designed for cheap ARM single-board computers
   and repurposed x86 workstations in regional clinics. The discipline scales
   in both directions: keeps budget hardware alive, keeps big hardware fast.
