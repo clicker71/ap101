@@ -1,0 +1,5 @@
+error: zero_alloc! rejected a heap allocation: `Box::new`. This section is declared 0-alloc; the list is documented in ferrite-macros.
+ --> tests/ui/box_new.rs:5:26
+  |
+5 |         let boxed = Box::new(1u32);
+  |                          ^^^

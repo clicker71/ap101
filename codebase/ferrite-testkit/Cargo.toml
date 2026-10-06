@@ -19,3 +19,9 @@ description = "Test utilities for ferrite-core discipline: heap isolation, PBT s
 ferrite-core = { path = "../ferrite-core", features = ["std"] }
 proptest = "1.4"
 rand = "0.8"
+
+[dev-dependencies]
+# Compile-fail self-tests for the `zero_alloc!` backstop. Dev-only: trybuild
+# and its UI harness never enter a release dependency graph.
+ferrite-macros = { path = "../ferrite-macros" }
+trybuild = "1"

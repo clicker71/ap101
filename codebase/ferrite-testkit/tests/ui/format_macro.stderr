@@ -1,0 +1,5 @@
+error: zero_alloc! rejected a heap allocation: `format!`. This section is declared 0-alloc; the list is documented in ferrite-macros.
+ --> tests/ui/format_macro.rs:5:20
+  |
+5 |         let text = format!("{}", 42);
+  |                    ^^^^^^

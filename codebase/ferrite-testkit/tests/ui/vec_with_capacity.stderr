@@ -1,0 +1,5 @@
+error: zero_alloc! rejected a heap allocation: `Vec::with_capacity`. This section is declared 0-alloc; the list is documented in ferrite-macros.
+ --> tests/ui/vec_with_capacity.rs:5:26
+  |
+5 |         let items = Vec::with_capacity(4);
+  |                          ^^^^^^^^^^^^^

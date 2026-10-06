@@ -1,0 +1,5 @@
+error: zero_alloc! rejected a heap allocation: `Vec::new`. This section is declared 0-alloc; the list is documented in ferrite-macros.
+ --> tests/ui/vec_new.rs:5:26
+  |
+5 |         let items = Vec::new();
+  |                          ^^^

@@ -11,6 +11,7 @@
 [workspace]
 members = [
     "codebase/ferrite-core",
+    "codebase/ferrite-macros",
     "codebase/ferrite-testkit",
     "codebase/examples/ap101b-core",
     "codebase/examples/ap101s-cmos",

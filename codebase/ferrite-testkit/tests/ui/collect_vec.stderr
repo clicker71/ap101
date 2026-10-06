@@ -1,0 +1,5 @@
+error: zero_alloc! rejected a heap allocation: `.collect::<Vec<_>>()`. This section is declared 0-alloc; the list is documented in ferrite-macros.
+ --> tests/ui/collect_vec.rs:5:41
+  |
+5 |         let items = [1u32, 2, 3].iter().collect::<Vec<_>>();
+  |                                         ^^^^^^^

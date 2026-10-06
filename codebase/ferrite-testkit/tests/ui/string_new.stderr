@@ -1,0 +1,5 @@
+error: zero_alloc! rejected a heap allocation: `String::new`. This section is declared 0-alloc; the list is documented in ferrite-macros.
+ --> tests/ui/string_new.rs:5:28
+  |
+5 |         let text = String::new();
+  |                            ^^^

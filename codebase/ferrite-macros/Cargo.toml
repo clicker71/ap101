@@ -1,0 +1,26 @@
+#--------------------------------------------------------------------
+# PACKAGE:       ferrite-macros
+# PURPOSE:       PROC-MACRO BACKSTOP FOR ZERO-ALLOC HOT SECTIONS:
+#                `zero_alloc!` REJECTS A SMALL DOCUMENTED DENY-LIST AT
+#                COMPILE TIME. SYNTACTIC HEURISTIC, NOT SOUND PROOF.
+# AUTHOR:        Daniil Solgalov <clicker71@github>
+# DATE:          2026-10-06
+# MACHINE:       IBM AP-101B (HONORARY)
+# CONSTRAINTS:   BUILD-TIME ONLY. NEVER LINKED INTO A RELEASE BINARY.
+#--------------------------------------------------------------------
+
+[package]
+name = "ferrite-macros"
+version = "0.1.0"
+edition = "2021"
+authors = ["Daniil Solgalov <clicker71@github.com>"]
+description = "Compile-time backstop rejecting common heap allocations inside hot sections"
+license = "MIT"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1"
+quote = "1"
+syn = { version = "2", features = ["full", "visit"] }
