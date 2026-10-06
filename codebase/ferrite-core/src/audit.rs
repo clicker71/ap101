@@ -196,3 +196,95 @@ macro_rules! cache_line_fields {
         ]
     };
 }
+
+/// COMPILE-TIME CAPACITY EQUALITY GATE.
+///
+/// PIN A TRUSTED CAPACITY CONSTANT TO ITS DOCUMENTED VALUE. A silent edit
+/// that RAISES a bound guarding an allocation (the exact edit that turns a
+/// bounded dispatcher into a DoS hole) then fails to COMPILE.
+///
+/// SAME CONST-BLOCK SHAPE AS [`assert_no_padding!`]: expands to
+/// `const _: () = { if !(CONST == N) { panic!(...) } }`. NO unsafe, NO
+/// alloc, NO deps, `no_std`-compatible.
+///
+/// ## EXAMPLE
+///
+/// ```ignore
+/// const MAX_FRAMES: u32 = 16_777_216;
+/// capacity_eq!(MAX_FRAMES, 16_777_216);
+/// ```
+#[macro_export]
+macro_rules! capacity_eq {
+    ($const:path, $expected:expr) => {
+        const _: () = {
+            if $const != $expected {
+                panic!(concat!(
+                    "CAPACITY GATE (eq) for ",
+                    stringify!($const),
+                    ": value does not equal the documented capacity (see the macro site)"
+                ))
+            }
+        };
+    };
+}
+
+/// COMPILE-TIME CAPACITY UPPER-BOUND GATE.
+///
+/// PIN A TRUSTED CAPACITY CONSTANT SO IT MAY ONLY DECREASE. A value above
+/// `N` fails to compile, so the bound guarding an allocation can never be
+/// silently RAISED (the guard-weakening edit), while a tightening edit
+/// still compiles.
+///
+/// SAME CONST-BLOCK SHAPE AS [`assert_no_padding!`].
+///
+/// ## EXAMPLE
+///
+/// ```ignore
+/// const MAX_PIXEL_LEN: usize = 512 * 512 * 4;
+/// capacity_le!(MAX_PIXEL_LEN, 512 * 512 * 4);
+/// ```
+#[macro_export]
+macro_rules! capacity_le {
+    ($const:path, $limit:expr) => {
+        const _: () = {
+            if $const > $limit {
+                panic!(concat!(
+                    "CAPACITY GATE (le) for ",
+                    stringify!($const),
+                    ": value exceeds the documented upper bound (see the macro site)"
+                ))
+            }
+        };
+    };
+}
+
+/// RUNTIME PREDICATE BEHIND THE CAPACITY GATES.
+///
+/// The `capacity_eq!` / `capacity_le!` gates only fire at COMPILE time, so
+/// they cannot be exercised by a `#[test]`. This `const fn` is the SAME
+/// rule as a value, which lets the self-test prove the predicate CAN return
+/// `false` (the falsifiability discipline every budget gate follows).
+#[must_use]
+pub const fn capacity_ok(actual: usize, declared: usize) -> bool {
+    actual == declared
+}
+
+#[cfg(test)]
+mod capacity_gate_tests {
+    use super::capacity_ok;
+
+    /// The predicate is TRUE at the documented capacity.
+    #[test]
+    fn capacity_ok_accepts_the_documented_value() {
+        assert!(capacity_ok(16_777_216, 16_777_216));
+    }
+
+    /// The predicate is FALSE one over: the gate CAN disagree, which is what
+    /// makes a real `capacity_eq!` mismatch a compile error rather than a
+    /// no-op.
+    #[test]
+    fn capacity_ok_rejects_an_over_capacity_value() {
+        assert!(!capacity_ok(16_777_216, 16_777_217));
+        assert!(!capacity_ok(16_777_217, 16_777_216));
+    }
+}
