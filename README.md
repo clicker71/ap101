@@ -94,6 +94,26 @@ methodology and per-run tables:
   and repurposed x86 workstations in regional clinics. The discipline scales
   in both directions: keeps budget hardware alive, keeps big hardware fast.
 
+### Inspired by BPF Capsule
+
+The region decomposition, `CAPSULE_NOSUSPEND`, and fixed-capacity ideas from
+[ayles/bpf-capsule](https://github.com/ayles/bpf-capsule) ("DOOM in the
+kernel") map directly onto ap101's verification discipline. Three of them
+became new gates:
+
+- **Capacity pins (`capacity_eq!` / `capacity_le!`):** compile-time pins for
+  DoS-relevant capacity constants - "every capacity is finite and fixed at
+  build time".
+- **No-alloc backstop (`zero_alloc!`):** a syntactic no-alloc backstop, the
+  analogue of `CAPSULE_NOSUSPEND`; documented as a heuristic, not a verifier
+  proof.
+- **Proof-fragility guard:** toolchain pin plus debug/release gate runs -
+  "the proofs the verifier accepts depend on LLVM and kernel versions".
+
+The pins held on the first run: every pinned constant and wrapped hot-spine
+function already satisfied its gate, so the new gates lock those paths
+against future drift rather than report a defect found today.
+
 ---
 
 ## Why "AP-101B"?
